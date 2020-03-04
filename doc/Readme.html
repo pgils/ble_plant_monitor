@@ -1,0 +1,176 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Custom Bluetooth Services - A Dialog Custom Implementation &#8212; Custom Bluetooth Services - A Dialog Custom Implementation  1.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/style.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/lpccsdocs/includes/iframeResizer.contentWindow.min.js"></script>
+    <script type="text/javascript" src="_static/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="_static/myscript.js"></script>
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="#">Custom Bluetooth Services - A Dialog Custom Implementation </a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="custom-bluetooth-services-a-dialog-custom-implementation">
+<span id="custom-bluetooth-services-a-dialog-custom-implementation"></span><h1>Custom Bluetooth Services - A Dialog Custom Implementation<a class="headerlink" href="#custom-bluetooth-services-a-dialog-custom-implementation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="example-description">
+<span id="example-description"></span><h2>Example description<a class="headerlink" href="#example-description" title="Permalink to this headline">¶</a></h2>
+<p>This application demonstrates a sophisticated way in creating custom Bluetooth Services. The core mechanism of the application is responsible for creating, initializing and registering custom Bluetooth Services in Dialog attribute database. On top of that mechanism a friendly abstraction layer has been implemented hiding all the complexity and thus, facilitating the developer to create their services easily and quickly.</p>
+<p>For demonstration purposes the application exhibits two custom Bluetooth Services. The first Bluetooth Service employs an initialized Characteristic Attribute, whilst the second Bluetooth Service includes three uninitialized Characteristic Attributes that can be configured as needed. The user is free to add as many Characteristic Attributes and Bluetooth Services as needed. The only limitation is the available memory space of the target device that should accommodate all the resources required for the declared Bluetooth Services.</p>
+<div class="section" id="hw-sw-configurations">
+<span id="hw-sw-configurations"></span><h3>HW &amp; SW Configurations<a class="headerlink" href="#hw-sw-configurations" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>Hardware Configurations</strong><ul>
+<li>This example runs on a DA1469x Bluetooth Smart SoC.</li>
+<li>A DA1469x Pro DevKit is needed for this example.</li>
+</ul>
+</li>
+<li><strong>Software Configurations</strong><ul>
+<li>Download the latest SDK version (10.0.4.x)</li>
+<li><strong>SEGGER’s J-Link</strong> tools should be downloaded and installed.</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="how-to-run-the-example">
+<span id="how-to-run-the-example"></span><h2>How to run the example<a class="headerlink" href="#how-to-run-the-example" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="initial-setup">
+<span id="initial-setup"></span><h3>Initial Setup<a class="headerlink" href="#initial-setup" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Download the source code from the Support Website.</li>
+<li>Import the project into your workspace.</li>
+<li>Connect the target device to your host PC.</li>
+<li>Compile the code and load it into the chip.</li>
+<li>Open a serial terminal (115200/8 - N - 1)</li>
+<li>Press the reset button on DevKit to start executing the application.</li>
+<li>The DA1469x module should be visible by any Bluetooth scanner APP.</li>
+</ul>
+<p>Verify the Bluetooth advertising data and public address:</p>
+<p><img alt="Advertising data" src="_images/ble_adv_data.png" /></p>
+<p>Press <strong>Connect</strong>, to connect to the peripheral device. The two custom Bluetooth Services should be displayed along with
+the <code class="docutils literal notranslate"><span class="pre">Generic</span> <span class="pre">Access</span></code> and <code class="docutils literal notranslate"><span class="pre">Generic</span> <span class="pre">Attribute</span></code> Services (the last one is mandatory for all the Bluetooth devices and it is
+created automatically by the Bluetooth stack):</p>
+<p><img alt="BLE Services" src="_images/ble_services.png" /></p>
+<p>Explore the second Bluetooth Service and verify that contains three uninitialized Characteristic Attributes:</p>
+<p><img alt="Unitialized BLE Service" src="_images/ble_service_uninitialized.png" /></p>
+<p>Explore the first Bluetooth Service and verify that contains one initialized Characteristic Attribute. You can
+verify its 128-bit UUID as well as its descriptors. Depending on the permission settings, the scanner App will draw the corresponding symbols. For instance, <strong>R</strong> for reading the Characteristic Attribute value, <strong>W</strong> for writing, and <strong>N</strong> or <strong>I</strong> for enabling/disabling notifications/indications respectively:</p>
+<p><img alt="Ininitialized BLE Service" src="_images/ble_service_initialized.png" /></p>
+<p>To start interacting with the peripheral device, press  <strong>W</strong> and in the pop-up window type a text. (e.g. Hello Word!) The written value and its size should be displayed on the serial console:</p>
+<p><img alt="Update Characteristic Value" src="_images/update_characteristic_value.PNG" /></p>
+<p>Verify the correct behavior of the Characteristic Attribute by pressing <strong>R</strong>. The current Characteristic Attribute value should be displayed on the serial console (this should be the last written value):</p>
+<p><img alt="Read Characteristic Value" src="_images/read_characteristic_value.PNG" /></p>
+<p>Press <strong>I</strong> to enable indications and try to write a new value as described previously (e.g. Hello!). The serial console should now display two messages. The first one is the written value sent to the peripheral device and the second one is the status of the notification event
+sent by the peripheral device to the remote users.</p>
+<p><img alt="notifications" src="_images/notifications.PNG" /></p>
+<p><strong>Note:</strong> When a Characteristic Attribute is updated, the Dialog device will automatically send a notification event towards the connected peer devices. You should expect to get as many notification callback functions as the number of the connected peer devices. The only
+prerequisite is for the remote device to have its notifications enabled.</p>
+<p><strong>Note:</strong> According to Bluetooth core specifications when a peer device attempts to send more than 20 bytes to the peripheral device, the <code class="docutils literal notranslate"><span class="pre">Prepare</span> <span class="pre">Write</span> <span class="pre">Request</span></code> Bluetooth event is invoked and the written value is split into chunks of 20 bytes which are sent one by one. When all data packets are received the peripheral device concatenates and provides them as a unified message. However, some scanner Apps may split the written value into chunks of 20 bytes and send them using separate write requests (without invoking a Prepare Write Request event). If this is the case, you should expect to get the following output on the serial console:</p>
+<p><img alt="Split Written Value" src="_images/split_written_value.png" /></p>
+</div>
+</div>
+<div class="section" id="known-limitations">
+<span id="known-limitations"></span><h2>Known Limitations<a class="headerlink" href="#known-limitations" title="Permalink to this headline">¶</a></h2>
+<p>There are no known limitations for this application.</p>
+</div>
+<div class="section" id="license">
+<span id="license"></span><h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<hr class="docutils" />
+<p>Copyright (c) 2019 Dialog Semiconductor. All rights reserved.</p>
+<p>This software (“Software”) is owned by Dialog Semiconductor. By using this Software
+you agree that Dialog Semiconductor retains all intellectual property and proprietary
+rights in and to this Software and any use, reproduction, disclosure or distribution
+of the Software without express written permission or a license agreement from Dialog
+Semiconductor is strictly prohibited. This Software is solely for use on or in
+conjunction with Dialog Semiconductor products.</p>
+<p>EXCEPT AS OTHERWISE PROVIDED IN A LICENSE AGREEMENT BETWEEN THE PARTIES OR AS
+REQUIRED BY LAW, THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. EXCEPT AS OTHERWISE PROVIDED
+IN A LICENSE AGREEMENT BETWEEN THE PARTIES OR BY LAW, IN NO EVENT SHALL DIALOG
+SEMICONDUCTOR BE LIABLE FOR ANY DIRECT, SPECIAL, INDIRECT, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE SOFTWARE.</p>
+<hr class="docutils" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/dslogoBlueSmall.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Custom Bluetooth Services - A Dialog Custom Implementation</a><ul>
+<li><a class="reference internal" href="#example-description">Example description</a><ul>
+<li><a class="reference internal" href="#hw-sw-configurations">HW &amp; SW Configurations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-to-run-the-example">How to run the example</a><ul>
+<li><a class="reference internal" href="#initial-setup">Initial Setup</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#known-limitations">Known Limitations</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="nav-item nav-item-0"><a href="#">Custom Bluetooth Services - A Dialog Custom Implementation </a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Dialog Semiconductor.
+    </div>
+  </body>
+</html>
