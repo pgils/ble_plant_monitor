@@ -31,6 +31,15 @@
 /* Required libraries for the target application */
 #include "ble_custom_service.h"
 
+/*
+ * The maximum length of name in scan response
+ */
+#define MAX_NAME_LEN    (BLE_SCAN_RSP_LEN_MAX - 2)
+
+/*
+ * The device's advertised name
+ */
+#define DEVICE_NAME     "BlueTanist Node-dev"
 
 /* Enable/disable changing the default Maximum Protocol Unit (MTU). */
 #define CHANGE_MTU_SIZE_ENABLE        (0)
@@ -49,7 +58,6 @@
  *
  **/
 #define CHARACTERISTIC_ATTR_VALUE_MAX_BYTES       (50)
-
 
 /*
  * Array used for holding the value of the Characteristic Attribute registered
@@ -71,11 +79,12 @@ __RETAINED_RW uint8_t _water_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0
 /*
  * BLE peripheral advertising data
  */
-static const uint8_t adv_data[] = {
-        0x14, GAP_DATA_TYPE_LOCAL_NAME,
-        'P', 'l', 'a', 'n', 't', ' ', 'M', 'o', 'n', 'i', 't', 'o', 'r', ' ', 'P', 'r', 'o', 't', 'o'
+static const gap_adv_ad_struct_t adv_data[] = {
+        GAP_ADV_AD_STRUCT_BYTES(GAP_DATA_TYPE_UUID128_LIST_INC,
+                                0x00, 0x00, 0x00, 0x90, 0x06, 0x42,
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                0x11, 0x11, 0x11, 0x11)
 };
-
 
 /* Task handle */
 __RETAINED_RW static OS_TASK ble_task_handle = NULL;
@@ -269,7 +278,13 @@ void ble_peripheral_task(void *params)
         int8_t wdog_id;
         ble_service_t *svc;
 
-        printf("\n*** Custom BLE Service Demonstration ***\n\n\r");
+        uint16_t name_len;
+        char name_buf[MAX_NAME_LEN + 1];        /* 1 byte for '\0' character */
+
+        /* Scan Response object to be populated with <Complete Local Name> AD type */
+        gap_adv_ad_struct_t *scan_rsp;
+
+        printf("\n*** %s started ***\n\n\r", DEVICE_NAME);
 
         // in case services which do not use svc are all disabled, just suppress -Wunused-variable
         (void) svc;
@@ -285,7 +300,16 @@ void ble_peripheral_task(void *params)
         ble_peripheral_start();
         ble_register_app();
 
-        ble_gap_device_name_set("Custom BLE Service", ATT_PERM_READ);
+        /* Get device name from DEVICE_NAME */
+        strcpy(name_buf, DEVICE_NAME);
+        name_len = strlen(name_buf);
+        name_buf[name_len] = '\0';
+
+        /* Set device name */
+        ble_gap_device_name_set(name_buf, ATT_PERM_READ);
+
+        /* Define Scan Response object internals dealing with retrieved name */
+        scan_rsp = GAP_ADV_AD_STRUCT_DECLARE(GAP_DATA_TYPE_LOCAL_NAME, name_len, name_buf);
 
 
 #if (CHANGE_MTU_SIZE_ENABLE == 1)
@@ -369,7 +393,7 @@ void ble_peripheral_task(void *params)
 
 
 
-        ble_gap_adv_data_set(sizeof(adv_data), adv_data, 0, NULL);
+        ble_gap_adv_ad_struct_set(ARRAY_LENGTH(adv_data), adv_data, 1 , scan_rsp);
         ble_gap_adv_start(GAP_CONN_MODE_UNDIRECTED);
 
 
