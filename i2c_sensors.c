@@ -155,6 +155,10 @@ int read_hih_sensor()
                 return 1;
         }
 
+        /*
+         * calculations based on:
+         * https://github.com/stevemarple/HIH61xx/blob/c8f90c5c30ba24ab2d017caa72c98508180187e9/src/HIH61xx.h#L168
+         */
         raw_humidity = ((((uint16_t)raw_data[0] & 0x3F) << 8) | (uint16_t)raw_data[1]);
         raw_temperature = ((uint16_t)raw_data[2] << 6) | ((uint16_t)raw_data[3] >> 2);
         rel_humidity = ((raw_humidity) * 100) / 16382;
