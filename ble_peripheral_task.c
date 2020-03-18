@@ -284,7 +284,7 @@ void ble_peripheral_task(void *params)
         /* Scan Response object to be populated with <Complete Local Name> AD type */
         gap_adv_ad_struct_t *scan_rsp;
 
-        printf("\n*** %s started ***\n\n\r", DEVICE_NAME);
+        printf("\n\r*** %s started ***\n\n\r", DEVICE_NAME);
 
         // in case services which do not use svc are all disabled, just suppress -Wunused-variable
         (void) svc;

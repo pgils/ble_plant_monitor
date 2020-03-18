@@ -24,7 +24,11 @@
 #include "sys_watchdog.h"
 
 /* Task priorities */
-#define mainBLE_PERIPHERAL_TASK_PRIORITY              ( OS_TASK_PRIORITY_NORMAL )
+#define mainBLE_PERIPHERAL_TASK_PRIORITY        ( OS_TASK_PRIORITY_NORMAL )
+#define mainI2C_TASK_PRIORITY                   ( OS_TASK_PRIORITY_LOWEST )
+
+/* The rate at which data is template task counter is incremented. */
+#define mainCOUNTER_FREQUENCY_MS                OS_MS_2_TICKS(200)
 
 #if dg_configUSE_WDOG
 INITIALISED_PRIVILEGED_DATA int8_t idle_task_wdog_id = -1;
@@ -35,12 +39,16 @@ INITIALISED_PRIVILEGED_DATA int8_t idle_task_wdog_id = -1;
  * memory, etc. are configured before main() is called.
  */
 static void prvSetupHardware( void );
+
 /*
  * Task functions .
  */
 void ble_peripheral_task(void *params);
+void I2C_task(void *params);
 
-static OS_TASK handle = NULL;
+__RETAINED static OS_TASK prvSysInit_h = NULL;
+__RETAINED static OS_TASK prvBLETask_h = NULL;
+__RETAINED static OS_TASK prvI2CTask_h = NULL;
 
 /**
  * @brief System Initialization and creation of the BLE task
@@ -111,8 +119,24 @@ static void system_init( void *pvParameters )
                                                            stack of the task. */
 #endif
                        mainBLE_PERIPHERAL_TASK_PRIORITY,/* The priority assigned to the task. */
-                       handle);                         /* The task handle. */
-        OS_ASSERT(handle);
+                       prvBLETask_h);                         /* The task prvBLETask_h. */
+        OS_ASSERT(prvBLETask_h);
+
+        /* Start the I2C task. */
+        OS_TASK_CREATE("I2C",                /* The text name assigned to the task, for
+                                                           debug only; not used by the kernel. */
+                       I2C_task,             /* The function that implements the task. */
+                       NULL,                            /* The parameter passed to the task. */
+#if defined CONFIG_RETARGET
+                       1024,                            /* The number of bytes to allocate to the
+                                                           stack of the task. */
+#else
+                       200 * OS_STACK_WORD_SIZE,        /* The number of bytes to allocate to the
+                                                           stack of the task. */
+#endif
+                       mainI2C_TASK_PRIORITY,/* The priority assigned to the task. */
+                       prvI2CTask_h);                         /* The task prvBLETask_h. */
+        OS_ASSERT(prvI2CTask_h);
 
         /* the work of the SysInit task is done */
         OS_TASK_DELETE(OS_GET_CURRENT_TASK());
@@ -135,7 +159,7 @@ int main( void )
                                 1200,                     /* The number of bytes to allocate to the
                                                              stack of the task. */
                                 OS_TASK_PRIORITY_HIGHEST, /* The priority assigned to the task. */
-                                handle );                 /* The task handle */
+                                prvSysInit_h);            /* The task prvBLETask_h */
         OS_ASSERT(status == OS_TASK_CREATE_SUCCESS);
 
         /* Start the tasks and timer running. */
