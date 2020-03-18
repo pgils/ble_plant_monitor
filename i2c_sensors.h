@@ -18,6 +18,13 @@
 int read_bmp_sensor();
 
 #endif /* dg_configSENSOR_BMP180 */
+#if dg_configSENSOR_HIH6130
+/**
+ * \brief HIH6130 read function
+ */
+int read_hih_sensor();
+
+#endif /* dg_configSENSOR_HIH6130 */
 
 #endif /* dg_configI2C_ADAPTER || dg_configUSE_HW_I2C */
 

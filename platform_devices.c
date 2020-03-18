@@ -78,4 +78,22 @@ const ad_i2c_controller_conf_t dev_BMP180 = {
 
 i2c_device BMP180 = &dev_BMP180;
 
+/* HIH6130 I2C driver configuration */
+const ad_i2c_driver_conf_t drv_HIH6130 = {
+        I2C_DEFAULT_CLK_CFG,
+        .i2c.speed              = HW_I2C_SPEED_STANDARD,
+        .i2c.mode               = HW_I2C_MODE_MASTER,
+        .i2c.addr_mode          = HW_I2C_ADDRESSING_7B,
+        .i2c.address            = HIH6130_I2C_ADDRESS
+};
+
+/* BMP180 I2C controller configuration */
+const ad_i2c_controller_conf_t dev_HIH6130 = {
+        .id     = HW_I2C1,
+        .io     = &io_I2C1,
+        .drv    = &drv_HIH6130
+};
+
+i2c_device HIH6130 = &dev_HIH6130;
+
 #endif /* dg_configI2C_ADAPTER || dg_configUSE_HW_I2C */

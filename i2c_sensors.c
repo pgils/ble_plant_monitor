@@ -129,3 +129,39 @@ int read_bmp_sensor()
         return 0;
 }
 
+int read_hih_sensor()
+{
+        uint8_t raw_data[4];
+        uint16_t raw_humidity, rel_humidity;
+        uint16_t raw_temperature, amb_temperature;
+
+        /*
+         * Send a measurement request.
+         */
+        i2c_write_reg(HIH6130, 0x0, NULL, 0);
+        /*
+         * Wait for the measurement to complete.
+         * The measurement cycle duration is typically
+         * 36.65ms for temperature and humidity readings.
+         * https://sensing.honeywell.com/i2c-comms-humidicon-tn-009061-2-en-final-07jun12.pdf
+         */
+        OS_DELAY_MS(40);
+
+        /*
+         * Read 4 bytes from the sensor
+         */
+        if (0 != i2c_read_reg(HIH6130, 0x0, raw_data, 4)) {
+                printf("HIH6130 sensor read failed.");
+                return 1;
+        }
+
+        raw_humidity = ((((uint16_t)raw_data[0] & 0x3F) << 8) | (uint16_t)raw_data[1]);
+        raw_temperature = ((uint16_t)raw_data[2] << 6) | ((uint16_t)raw_data[3] >> 2);
+        rel_humidity = ((raw_humidity) * 100) / 16382;
+        amb_temperature = (((raw_temperature) * 165) / 16382) - 40;
+
+        printf("HIH6130: Temp: %u °C, Humidity: %u\r\n", amb_temperature, rel_humidity);
+
+        return 0;
+}
+

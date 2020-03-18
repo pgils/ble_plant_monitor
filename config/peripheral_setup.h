@@ -9,6 +9,7 @@
 #define CONFIG_PERIPHERAL_SETUP_H_
 
 #define BMP180_I2C_ADDRESS    ( 0xEE >> 1 )
+#define HIH6130_I2C_ADDRESS   ( 0x27 )
 
 /**
  * I2C 1 configuration

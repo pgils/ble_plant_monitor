@@ -41,6 +41,9 @@ void I2C_task(void *params)
 #if dg_configSENSOR_BMP180
                 read_bmp_sensor();
 #endif /* dg_configSENSOR_BMP180 */
+#if dg_configSENSOR_HIH6130
+                read_hih_sensor();
+#endif /* dg_configSENSOR_HIH6130 */
                 OS_DELAY_MS(1000);
 //
 //                OS_BASE_TYPE ret;

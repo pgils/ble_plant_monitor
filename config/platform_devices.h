@@ -33,6 +33,11 @@ extern i2c_device GENERIC;
  */
 extern i2c_device BMP180;
 
+/**
+ * \brief HIH6130 device
+ */
+extern i2c_device HIH6130;
+
 #endif /* dg_configI2C_ADAPTER || dg_configUSE_HW_I2C */
 
 #endif /* CONFIG_PLATFORM_DEVICES_H_ */
