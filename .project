@@ -3,6 +3,7 @@
 	<name>ble_plant_monitor_proto</name>
 	<comment></comment>
 	<projects>
+		<project>ble_plant_monitor_proto</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -86,6 +86,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/util/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ble_plant_monitor_proto/drivers/BMP180_driver}&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.953045446" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="dg_configDEVICE=DEVICE_DA1469x"/>
@@ -229,6 +230,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/util/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ble_plant_monitor_proto/drivers/BMP180_driver}&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.755417148" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="dg_configDEVICE=DEVICE_DA1469x"/>
@@ -373,6 +375,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/util/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ble_plant_monitor_proto/drivers/BMP180_driver}&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1572839361" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="dg_configDEVICE=DEVICE_DA1469x"/>
@@ -472,7 +475,8 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.allwarn.843439754" name="Enable all common warnings (-Wall)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.allwarn" useByScannerDiscovery="true" value="true" valueType="boolean"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.985939262" name="Float ABI" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.hard" valueType="enumerated"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.2046301479" name="FPU Type" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.fpv5spd16" valueType="enumerated"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.other.107921269" name="Other warning flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.other" value="-Wno-cpp" valueType="string"/>
+							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.other.107921269" name="Other warning flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.other" useByScannerDiscovery="true" value="-Wno-cpp" valueType="string"/>
+							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.toolchain.id.2072781520" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.toolchain.id" value="1287942917" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform.1876110328" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
 							<builder arguments="--silent" buildPath="${workspace_loc:/pxp_reporter}/Debug_QSPI" command="${cross_make}" id="ilg.gnuarmeclipse.managedbuild.cross.builder.257702726" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" parallelBuildOn="false" superClass="ilg.gnuarmeclipse.managedbuild.cross.builder"/>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.369104740" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
@@ -515,6 +519,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/sys_man/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sdk/util/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ble_plant_monitor_proto/drivers/BMP180_driver}&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1712395722" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="dg_configDEVICE=DEVICE_DA1469x"/>
@@ -567,7 +572,9 @@
 					</folderInfo>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="ble_plant_monitor_proto;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.888508112.1109272036.1860632540.131511888" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+			</storageModule>
 			<storageModule moduleId="ilg.gnuarmeclipse.managedbuild.packs"/>
 			<storageModule moduleId="packages"/>
 		</cconfiguration>
@@ -594,5 +601,17 @@
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.1408807074.925545972.2094326233.460296828.1667232970;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.1408807074.925545972.2094326233.460296828.1667232970.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1434412593;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1673875272">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.888508112.1109272036.1860632540.131511888;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.888508112.1109272036.1860632540.131511888.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1803355980;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1829523504">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.1408807074.925545972.2094326233.460296828.1667232970.1254707360;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.1408807074.925545972.2094326233.460296828.1667232970.1254707360.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1660360842;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1963444648">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.888508112.1109272036.1543722894;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.76586611.1998356308.1307238415.594730370.888508112.1109272036.1543722894.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.275794024;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1727680537">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>
