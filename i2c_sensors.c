@@ -16,7 +16,9 @@
 /*
  * Drivers
  */
+#if dg_configSENSOR_BMP180
 #include "bmp180.h"
+#endif /* dg_configSENSOR_BMP180 */
 
 /*
  * Error code returned after an I2C operation. It can be used
@@ -81,6 +83,10 @@ static int8_t i2c_read_reg(i2c_device dev, uint8_t reg, uint8_t *val, uint8_t le
         return I2C_error_code;
 }
 
+#if dg_configSENSOR_BMP180
+/*
+ * Wrapper functions for BMP180 driver
+ */
 void bmp_os_delay (u32 millisec)
 {
         OS_DELAY_MS(millisec);
@@ -128,7 +134,9 @@ int read_bmp_sensor()
 
         return 0;
 }
+#endif /* dg_configSENSOR_BMP180 */
 
+#if dg_configSENSOR_HIH6130
 int read_hih_sensor()
 {
         uint8_t raw_data[4];
@@ -168,4 +176,5 @@ int read_hih_sensor()
 
         return 0;
 }
+#endif /* dg_configSENSOR_HIH6130 */
 
