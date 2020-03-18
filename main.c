@@ -201,8 +201,8 @@ static void prvSetupHardware( void )
         /* Enable the COM power domain before handling any GPIO pin */
         hw_sys_pd_com_enable();
 
-        ad_i2c_io_config(((ad_i2c_controller_conf_t *)BMP180)->id,
-                ((ad_i2c_controller_conf_t *)BMP180)->io, AD_IO_CONF_OFF);
+        ad_i2c_io_config(((ad_i2c_controller_conf_t *)GENERIC)->id,
+                ((ad_i2c_controller_conf_t *)GENERIC)->io, AD_IO_CONF_OFF);
 
         /* Disable the COM power domain after handling the GPIO pins */
         hw_sys_pd_com_disable();

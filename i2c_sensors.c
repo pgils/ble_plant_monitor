@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "osal.h"
 #include "ad_i2c.h"
 #include "hw_i2c.h"
 #include "peripheral_setup.h"
@@ -87,11 +88,13 @@ void bmp_os_delay (u32 millisec)
 
 static int8_t bmp_write_reg(uint8_t dev_addr, uint8_t reg, uint8_t *val, uint8_t len)
 {
+        (void)(dev_addr);
         return i2c_write_reg(BMP180, reg, val, len);
 }
 
 static int8_t bmp_read_reg(uint8_t dev_addr, uint8_t reg, uint8_t *val, uint8_t len)
 {
+        (void)(dev_addr);
         return i2c_read_reg(BMP180, reg, val, len);
 }
 
@@ -121,7 +124,7 @@ int read_bmp_sensor()
         uint32_t pres = bmp180_get_pressure(v_uncomp_press_u32);
 
 
-        printf("Temp: %u (0.1)°C, Pressure: %lu (1.0)Pa\r\n", temp, pres);
+        printf("BMP: Temp: %u (0.1)°C, Pressure: %lu (1.0)Pa\r\n", temp, pres);
 
         return 0;
 }

@@ -43,6 +43,22 @@ const ad_i2c_io_conf_t io_I2C1 = {
 
 #if dg_configI2C_ADAPTER || dg_configUSE_HW_I2C
 
+/* Generic I2C driver configuration */
+const ad_i2c_driver_conf_t drv_GENERIC = {
+        I2C_DEFAULT_CLK_CFG,
+        .i2c.speed              = HW_I2C_SPEED_STANDARD,
+        .i2c.mode               = HW_I2C_MODE_MASTER,
+        .i2c.addr_mode          = HW_I2C_ADDRESSING_7B
+};
+
+/* Generic I2C controller configuration */
+const ad_i2c_controller_conf_t dev_GENERIC = {
+        .id     = HW_I2C1,
+        .io     = &io_I2C1,
+        .drv    = &drv_GENERIC
+};
+
+i2c_device GENERIC = &dev_GENERIC;
 
 /* BMP180 I2C driver configuration */
 const ad_i2c_driver_conf_t drv_BMP180 = {

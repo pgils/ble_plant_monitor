@@ -24,6 +24,11 @@ typedef const void* i2c_device;
 #if dg_configI2C_ADAPTER || dg_configUSE_HW_I2C
 
 /**
+ * \brief Generic I2C device
+ */
+extern i2c_device GENERIC;
+
+/**
  * \brief BMP180 device
  */
 extern i2c_device BMP180;
