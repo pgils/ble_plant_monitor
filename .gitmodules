@@ -1,0 +1,3 @@
+[submodule "drivers/BMP180_driver"]
+	path = drivers/BMP180_driver
+	url = https://github.com/BoschSensortec/BMP180_driver.git
