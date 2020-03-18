@@ -22,6 +22,12 @@
 #include "sys_clock_mgr.h"
 #include "sys_power_mgr.h"
 #include "sys_watchdog.h"
+#include "hw_pdc.h"
+#include "ad_i2c.h"
+#include "hw_wkup.h"
+#include "hw_sys.h"
+#include "peripheral_setup.h"
+#include "platform_devices.h"
 
 /* Task priorities */
 #define mainBLE_PERIPHERAL_TASK_PRIORITY        ( OS_TASK_PRIORITY_NORMAL )
@@ -191,6 +197,15 @@ static void prvSetupHardware( void )
 
         /* Init hardware */
         pm_system_init(periph_init);
+
+        /* Enable the COM power domain before handling any GPIO pin */
+        hw_sys_pd_com_enable();
+
+        ad_i2c_io_config(((ad_i2c_controller_conf_t *)BMP180)->id,
+                ((ad_i2c_controller_conf_t *)BMP180)->io, AD_IO_CONF_OFF);
+
+        /* Disable the COM power domain after handling the GPIO pins */
+        hw_sys_pd_com_disable();
 
 }
 

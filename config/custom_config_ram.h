@@ -74,6 +74,13 @@
 #define dg_configNVMS_ADAPTER                   ( 1 )
 #define dg_configNVMS_VES                       ( 1 )
 #define dg_configNVPARAM_ADAPTER                ( 1 )
+#define dg_configI2C_ADAPTER                    ( 1 )
+#define dg_configUSE_HW_I2C                     ( 1 )
+
+/*************************************************************************************************\
+ * Sensor configuration
+ */
+#define dg_configSENSOR_BMP180                  ( 1 )
 
 /*************************************************************************************************\
  * BLE configuration

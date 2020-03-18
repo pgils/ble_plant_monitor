@@ -12,20 +12,16 @@
  ****************************************************************************************
  */
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
 
 #include "osal.h"
 
-
 /* Required libraries for the target application */
+#include "i2c_sensors.h"
 
 
 /* Enable/disable debugging aid. Valid values */
 #define DBG_SERIAL_CONSOLE_ENABLE      (1)
-
 
 /* Task handle */
 __RETAINED_RW static OS_TASK i2c_task_handle = NULL;
@@ -42,15 +38,20 @@ void I2C_task(void *params)
 
 
         for (;;) {
-                OS_BASE_TYPE ret;
-                uint32_t notif;
-
-                /*
-                 * Wait on any of the notification bits, then clear them all
-                 */
-                ret = OS_TASK_NOTIFY_WAIT(0, OS_TASK_NOTIFY_ALL_BITS, &notif, OS_TASK_NOTIFY_FOREVER);
-                /* Blocks forever waiting for task notification. The return value must be OS_OK */
-                OS_ASSERT(ret == OS_OK);
+#if dg_configSENSOR_BMP180
+                read_bmp_sensor();
+#endif /* dg_configSENSOR_BMP180 */
+                OS_DELAY_MS(1000);
+//
+//                OS_BASE_TYPE ret;
+//                uint32_t notif;
+//
+//                /*
+//                 * Wait on any of the notification bits, then clear them all
+//                 */
+//                ret = OS_TASK_NOTIFY_WAIT(0, OS_TASK_NOTIFY_ALL_BITS, &notif, OS_TASK_NOTIFY_FOREVER);
+//                /* Blocks forever waiting for task notification. The return value must be OS_OK */
+//                OS_ASSERT(ret == OS_OK);
 
         }
 }
