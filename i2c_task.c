@@ -27,8 +27,6 @@
 __RETAINED_RW static OS_TASK i2c_task_handle = NULL;
 
 
-
-
 void I2C_task(void *params)
 {
         /* Get task's handler */
@@ -38,14 +36,24 @@ void I2C_task(void *params)
 
 
         for (;;) {
+                struct sensor_data_t new_sensor_data = { 0 };
+
 #if dg_configSENSOR_BMP180
-                read_bmp_sensor();
+                read_bmp_sensor(&new_sensor_data.temperature);
 #endif /* dg_configSENSOR_BMP180 */
 #if dg_configSENSOR_HIH6130
-                read_hih_sensor();
+                read_hih_sensor(&new_sensor_data.temperature);
 #endif /* dg_configSENSOR_HIH6130 */
+
+                /*
+                 * Copy new sensor data to the global data struct
+                 */
+                taskENTER_CRITICAL();
+                sensor_data.temperature = new_sensor_data.temperature;
+                taskEXIT_CRITICAL();
+
                 OS_DELAY_MS(1000);
-//
+
 //                OS_BASE_TYPE ret;
 //                uint32_t notif;
 //

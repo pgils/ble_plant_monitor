@@ -30,6 +30,7 @@
 
 /* Required libraries for the target application */
 #include "ble_custom_service.h"
+#include "i2c_sensors.h"
 
 /*
  * The maximum length of name in scan response
@@ -200,14 +201,17 @@ void event_sent_cb(uint16_t conn_idx, bool status, gatt_event_t type)
 
 void get_temperature_value_cb(uint8_t **value, uint16_t *length)
 {
-        /* Generate new random value */
-        uint8_t newVal[1] = { rand() % 20 + 20 };
+        uint16_t return_value;
+
+        taskENTER_CRITICAL();
+        return_value = sensor_data.temperature;
+        taskEXIT_CRITICAL();
 
         /* Clear the current Temperature Attribute value */
         memset((void *)_temperature_attr_val, 0x00, sizeof(_temperature_attr_val));
 
         /* Update the Characteristic Attribute value as requested by the peer device */
-        memcpy((void *)_temperature_attr_val, (void *)&newVal, 1);
+        memcpy((void *)_temperature_attr_val, (void *)&return_value, sizeof(return_value));
 
         /* Return the requested data back to the peer device */
         *value  = _temperature_attr_val;       // A pointer that points to the returned data

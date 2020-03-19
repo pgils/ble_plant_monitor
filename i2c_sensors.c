@@ -104,7 +104,7 @@ static int8_t bmp_read_reg(uint8_t dev_addr, uint8_t reg, uint8_t *val, uint8_t 
         return i2c_read_reg(BMP180, reg, val, len);
 }
 
-int read_bmp_sensor()
+int read_bmp_sensor(uint16_t *temperature)
 {
         struct bmp180_t bmp180;
         int32_t com_rslt = E_BMP_COMM_RES;
@@ -129,7 +129,7 @@ int read_bmp_sensor()
         uint16_t temp = bmp180_get_temperature(v_uncomp_temp_u16);
         uint32_t pres = bmp180_get_pressure(v_uncomp_press_u32);
 
-
+        *temperature = temp;
         printf("BMP: Temp: %u (0.1)°C, Pressure: %lu (1.0)Pa\r\n", temp, pres);
 
         return 0;

@@ -8,6 +8,10 @@
 #ifndef I2C_SENSORS_H_
 #define I2C_SENSORS_H_
 
+struct sensor_data_t {
+        uint16_t temperature;
+        uint16_t humidity;
+} sensor_data;
 
 #if dg_configI2C_ADAPTER || dg_configUSE_HW_I2C
 
@@ -15,7 +19,7 @@
 /**
  * \brief BMP180 read function
  */
-int read_bmp_sensor();
+int read_bmp_sensor(uint16_t *temperature);
 
 #endif /* dg_configSENSOR_BMP180 */
 #if dg_configSENSOR_HIH6130
