@@ -81,7 +81,7 @@
  * Sensor configuration
  */
 #define dg_configSENSOR_BMP180                  ( 0 )
-#define dg_configSENSOR_HIH6130                 ( 1 )
+#define dg_configSENSOR_HIH6130                 ( 0 )
 
 /*************************************************************************************************\
  * BLE configuration
