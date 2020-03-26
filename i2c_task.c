@@ -39,10 +39,10 @@ void I2C_task(void *params)
                 struct sensor_data_t new_sensor_data = { 0 };
 
 #if dg_configSENSOR_BMP180
-                read_bmp_sensor(&new_sensor_data.temperature);
+                read_bmp_sensor(&new_sensor_data);
 #endif /* dg_configSENSOR_BMP180 */
 #if dg_configSENSOR_HIH6130
-                read_hih_sensor(&new_sensor_data.temperature);
+                read_hih_sensor(&new_sensor_data);
 #endif /* dg_configSENSOR_HIH6130 */
 
                 /*
@@ -50,6 +50,7 @@ void I2C_task(void *params)
                  */
                 taskENTER_CRITICAL();
                 sensor_data.temperature = new_sensor_data.temperature;
+                sensor_data.humidity = new_sensor_data.humidity;
                 taskEXIT_CRITICAL();
 
                 OS_DELAY_MS(1000);

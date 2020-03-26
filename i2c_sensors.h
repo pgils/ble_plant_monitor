@@ -11,6 +11,7 @@
 struct sensor_data_t {
         uint16_t temperature;
         uint16_t humidity;
+        uint16_t water;
 } sensor_data;
 
 #if dg_configI2C_ADAPTER || dg_configUSE_HW_I2C
@@ -19,14 +20,14 @@ struct sensor_data_t {
 /**
  * \brief BMP180 read function
  */
-int read_bmp_sensor(uint16_t *temperature);
+int read_bmp_sensor(struct sensor_data_t *data);
 
 #endif /* dg_configSENSOR_BMP180 */
 #if dg_configSENSOR_HIH6130
 /**
  * \brief HIH6130 read function
  */
-int read_hih_sensor();
+int read_hih_sensor(struct sensor_data_t *data);
 
 #endif /* dg_configSENSOR_HIH6130 */
 

@@ -12,6 +12,7 @@
 #include "hw_i2c.h"
 #include "peripheral_setup.h"
 #include "platform_devices.h"
+#include "i2c_sensors.h"
 
 /*
  * Drivers
@@ -104,7 +105,7 @@ static int8_t bmp_read_reg(uint8_t dev_addr, uint8_t reg, uint8_t *val, uint8_t 
         return i2c_read_reg(BMP180, reg, val, len);
 }
 
-int read_bmp_sensor(uint16_t *temperature)
+int read_bmp_sensor(struct sensor_data_t *data)
 {
         struct bmp180_t bmp180;
         int32_t com_rslt = E_BMP_COMM_RES;
@@ -129,7 +130,7 @@ int read_bmp_sensor(uint16_t *temperature)
         uint16_t temp = bmp180_get_temperature(v_uncomp_temp_u16);
         uint32_t pres = bmp180_get_pressure(v_uncomp_press_u32);
 
-        *temperature = temp;
+        data->temperature = temp;
         printf("BMP: Temp: %u (0.1)°C, Pressure: %lu (1.0)Pa\r\n", temp, pres);
 
         return 0;
@@ -137,7 +138,7 @@ int read_bmp_sensor(uint16_t *temperature)
 #endif /* dg_configSENSOR_BMP180 */
 
 #if dg_configSENSOR_HIH6130
-int read_hih_sensor(uint16_t *temperature)
+int read_hih_sensor(struct sensor_data_t *data)
 {
         uint8_t raw_data[4];
         uint16_t raw_humidity, rel_humidity;
@@ -172,7 +173,8 @@ int read_hih_sensor(uint16_t *temperature)
         rel_humidity = ((raw_humidity) * 100) / 16382;
         amb_temperature = (((raw_temperature) * 165) / 16382) - 40;
 
-        *temperature = amb_temperature;
+        data->temperature = amb_temperature;
+        data->humidity = rel_humidity;
         printf("HIH6130: Temp: %u °C, Humidity: %u\r\n", amb_temperature, rel_humidity);
 
         return 0;

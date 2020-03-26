@@ -220,14 +220,17 @@ void get_temperature_value_cb(uint8_t **value, uint16_t *length)
 
 void get_humidity_value_cb(uint8_t **value, uint16_t *length)
 {
-        /* Generate new random value */
-        uint8_t newVal[1] = { rand() % 70 + 30 };
+        uint16_t return_value;
+
+        taskENTER_CRITICAL();
+        return_value = sensor_data.humidity;
+        taskEXIT_CRITICAL();
 
         /* Clear the current Temperature Attribute value */
         memset((void *)_humidity_attr_val, 0x00, sizeof(_water_attr_val));
 
         /* Update the Characteristic Attribute value as requested by the peer device */
-        memcpy((void *)_humidity_attr_val, (void *)&newVal, 1);
+        memcpy((void *)_humidity_attr_val, (void *)&return_value, sizeof(return_value));
 
         /* Return the requested data back to the peer device */
         *value  = _humidity_attr_val;       // A pointer that points to the returned data
@@ -236,14 +239,17 @@ void get_humidity_value_cb(uint8_t **value, uint16_t *length)
 
 void get_water_value_cb(uint8_t **value, uint16_t *length)
 {
-        /* Generate new random value */
-        uint8_t newVal[1] = { rand() % 90 + 10 };
+        uint16_t return_value;
+
+        taskENTER_CRITICAL();
+        return_value = sensor_data.water;
+        taskEXIT_CRITICAL();
 
         /* Clear the current Temperature Attribute value */
         memset((void *)_water_attr_val, 0x00, sizeof(_water_attr_val));
 
         /* Update the Characteristic Attribute value as requested by the peer device */
-        memcpy((void *)_water_attr_val, (void *)&newVal, 1);
+        memcpy((void *)_water_attr_val, (void *)&return_value, sizeof(return_value));
 
         /* Return the requested data back to the peer device */
         *value  = _water_attr_val;       // A pointer that points to the returned data
