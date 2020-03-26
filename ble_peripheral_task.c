@@ -201,7 +201,7 @@ void event_sent_cb(uint16_t conn_idx, bool status, gatt_event_t type)
 
 void get_temperature_value_cb(uint8_t **value, uint16_t *length)
 {
-        uint16_t return_value;
+        uint32_t return_value;
 
         taskENTER_CRITICAL();
         return_value = sensor_data.temperature;
@@ -220,7 +220,7 @@ void get_temperature_value_cb(uint8_t **value, uint16_t *length)
 
 void get_humidity_value_cb(uint8_t **value, uint16_t *length)
 {
-        uint16_t return_value;
+        uint32_t return_value;
 
         taskENTER_CRITICAL();
         return_value = sensor_data.humidity;
@@ -239,7 +239,7 @@ void get_humidity_value_cb(uint8_t **value, uint16_t *length)
 
 void get_water_value_cb(uint8_t **value, uint16_t *length)
 {
-        uint16_t return_value;
+        uint32_t return_value;
 
         taskENTER_CRITICAL();
         return_value = sensor_data.water;

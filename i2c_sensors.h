@@ -9,9 +9,9 @@
 #define I2C_SENSORS_H_
 
 struct sensor_data_t {
-        uint16_t temperature;
-        uint16_t humidity;
-        uint16_t water;
+        uint32_t temperature;
+        uint32_t humidity;
+        uint32_t water;
 } sensor_data;
 
 #if dg_configI2C_ADAPTER || dg_configUSE_HW_I2C

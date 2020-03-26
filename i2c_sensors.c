@@ -130,7 +130,7 @@ int read_bmp_sensor(struct sensor_data_t *data)
         uint16_t temp = bmp180_get_temperature(v_uncomp_temp_u16);
         uint32_t pres = bmp180_get_pressure(v_uncomp_press_u32);
 
-        data->temperature = temp;
+        data->temperature = temp * 10;
         printf("BMP: Temp: %u (0.1)°C, Pressure: %lu (1.0)Pa\r\n", temp, pres);
 
         return 0;
@@ -170,8 +170,8 @@ int read_hih_sensor(struct sensor_data_t *data)
          */
         raw_humidity = ((((uint16_t)raw_data[0] & 0x3F) << 8) | (uint16_t)raw_data[1]);
         raw_temperature = ((uint16_t)raw_data[2] << 6) | ((uint16_t)raw_data[3] >> 2);
-        rel_humidity = ((raw_humidity) * 100) / 16382;
-        amb_temperature = (((raw_temperature) * 165) / 16382) - 40;
+        rel_humidity = ((raw_humidity) * 10000) / 16382;
+        amb_temperature = (((raw_temperature) * 16500) / 16382) - 40;
 
         data->temperature = amb_temperature;
         data->humidity = rel_humidity;
