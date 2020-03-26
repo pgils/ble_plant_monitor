@@ -7,6 +7,7 @@
    ```
 2. Update drivers (if needed; currently only BMP180 uses external driver)
    ```
+   $ cd ble_plant_monitor
    $ git submodule init
    $ git submodule update
    ```
