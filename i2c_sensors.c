@@ -127,11 +127,11 @@ int read_bmp_sensor(struct sensor_data_t *data)
         com_rslt += bmp180_get_temperature(v_uncomp_temp_u16);
 
         com_rslt += bmp180_get_pressure(v_uncomp_press_u32);
-        uint16_t temp = bmp180_get_temperature(v_uncomp_temp_u16);
+        uint32_t temp = bmp180_get_temperature(v_uncomp_temp_u16);
         uint32_t pres = bmp180_get_pressure(v_uncomp_press_u32);
 
         data->temperature = temp * 10;
-        printf("BMP: Temp: %u (0.1)°C, Pressure: %lu (1.0)Pa\r\n", temp, pres);
+        printf("BMP: Temp: %lu, Pressure: %lu\r\n", temp, pres);
 
         return 0;
 }
