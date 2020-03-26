@@ -141,8 +141,8 @@ int read_bmp_sensor(struct sensor_data_t *data)
 int read_hih_sensor(struct sensor_data_t *data)
 {
         uint8_t raw_data[4];
-        uint16_t raw_humidity, rel_humidity;
-        uint16_t raw_temperature, amb_temperature;
+        uint16_t raw_humidity, raw_temperature;
+        uint32_t rel_humidity, amb_temperature;
 
         /*
          * Send a measurement request.
@@ -170,12 +170,12 @@ int read_hih_sensor(struct sensor_data_t *data)
          */
         raw_humidity = ((((uint16_t)raw_data[0] & 0x3F) << 8) | (uint16_t)raw_data[1]);
         raw_temperature = ((uint16_t)raw_data[2] << 6) | ((uint16_t)raw_data[3] >> 2);
-        rel_humidity = ((raw_humidity) * 10000) / 16382;
-        amb_temperature = (((raw_temperature) * 16500) / 16382) - 40;
+        rel_humidity = ((uint32_t)raw_humidity * 10000) / 16382;
+        amb_temperature = (((uint32_t)raw_temperature * 16500) / 16382) - 4000;
 
         data->temperature = amb_temperature;
         data->humidity = rel_humidity;
-        printf("HIH6130: Temp: %u °C, Humidity: %u\r\n", amb_temperature, rel_humidity);
+        printf("HIH6130: Temp: %lu, Humidity: %lu\r\n", amb_temperature, rel_humidity);
 
         return 0;
 }
