@@ -137,7 +137,7 @@ int read_bmp_sensor(uint16_t *temperature)
 #endif /* dg_configSENSOR_BMP180 */
 
 #if dg_configSENSOR_HIH6130
-int read_hih_sensor()
+int read_hih_sensor(uint16_t *temperature)
 {
         uint8_t raw_data[4];
         uint16_t raw_humidity, rel_humidity;
@@ -172,6 +172,7 @@ int read_hih_sensor()
         rel_humidity = ((raw_humidity) * 100) / 16382;
         amb_temperature = (((raw_temperature) * 165) / 16382) - 40;
 
+        *temperature = amb_temperature;
         printf("HIH6130: Temp: %u °C, Humidity: %u\r\n", amb_temperature, rel_humidity);
 
         return 0;
