@@ -51,6 +51,7 @@ static int8_t i2c_write_reg(i2c_device dev, uint8_t reg, uint8_t *val, uint8_t l
                 return I2C_error_code;
         }
 
+        /* Close the device */
         ad_i2c_close(dev_hdr, false);
 
         return I2C_error_code;
@@ -73,12 +74,16 @@ static int8_t i2c_read_reg(i2c_device dev, uint8_t reg, uint8_t *val, uint8_t le
                 return I2C_error_code;
         }
 
+        /*
+         * Read <len> bytes.
+         */
         I2C_error_code = ad_i2c_read(dev_hdr, val, len, HW_I2C_F_ADD_STOP);
         if (HW_I2C_ABORT_NONE != I2C_error_code) {
                 printf("I2C read failure: %u\n", I2C_error_code);
                 return I2C_error_code;
         }
 
+        /* Close the device */
         ad_i2c_close(dev_hdr, false);
 
         return I2C_error_code;
@@ -95,16 +100,23 @@ void bmp_os_delay (u32 millisec)
 
 static int8_t bmp_write_reg(uint8_t dev_addr, uint8_t reg, uint8_t *val, uint8_t len)
 {
+        /* Ignore unused parameter dev_addr */
         (void)(dev_addr);
         return i2c_write_reg(BMP180, reg, val, len);
 }
 
 static int8_t bmp_read_reg(uint8_t dev_addr, uint8_t reg, uint8_t *val, uint8_t len)
 {
+        /* Ignore unused parameter dev_addr */
         (void)(dev_addr);
         return i2c_read_reg(BMP180, reg, val, len);
 }
 
+/*
+ * Read ambient temperature and atmospheric pressure from BMP180 sensor.
+ * Based on
+ * https://github.com/BoschSensortec/BMP180_driver/blob/49a796a0d675d5b3a7573d9240cf829e658ed79c/bmp180_support.c#L107
+ */
 int read_bmp_sensor(struct sensor_data_t *data)
 {
         struct bmp180_t bmp180;
@@ -138,6 +150,9 @@ int read_bmp_sensor(struct sensor_data_t *data)
 #endif /* dg_configSENSOR_BMP180 */
 
 #if dg_configSENSOR_HIH6130
+/*
+ * Read ambient temperature and relative humidity from HIH6130 sensor.
+ */
 int read_hih_sensor(struct sensor_data_t *data)
 {
         uint8_t raw_data[4];
@@ -165,6 +180,7 @@ int read_hih_sensor(struct sensor_data_t *data)
         }
 
         /*
+         * Calculate the Relative humidity and Ambient temperature values.
          * calculations based on:
          * https://github.com/stevemarple/HIH61xx/blob/c8f90c5c30ba24ab2d017caa72c98508180187e9/src/HIH61xx.h#L168
          */

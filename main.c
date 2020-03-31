@@ -52,6 +52,9 @@ static void prvSetupHardware( void );
 void ble_peripheral_task(void *params);
 void I2C_task(void *params);
 
+/*
+ * Task handles
+ */
 __RETAINED static OS_TASK prvSysInit_h = NULL;
 __RETAINED static OS_TASK prvBLETask_h = NULL;
 __RETAINED static OS_TASK prvI2CTask_h = NULL;
@@ -88,7 +91,7 @@ static void system_init( void *pvParameters )
 
         /* Set system clock */
 
-        /* Prepare the hardware to run this demo. */
+        /* Prepare the hardware */
         prvSetupHardware();
 
         /*

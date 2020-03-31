@@ -61,20 +61,13 @@
 #define CHARACTERISTIC_ATTR_VALUE_MAX_BYTES       (50)
 
 /*
- * Array used for holding the value of the Characteristic Attribute registered
+ * Arrays used for holding the value of the Characteristic Attributes registered
  * in Dialog BLE database.
  */
-__RETAINED_RW uint8_t _characteristic_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 __RETAINED_RW uint8_t _temperature_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 __RETAINED_RW uint8_t _humidity_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 __RETAINED_RW uint8_t _water_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 
-
-
-/*
- * Notification bits reservation
- * bit #0 is always assigned to BLE event queue notification
- */
 
 
 /*
@@ -90,77 +83,6 @@ static const gap_adv_ad_struct_t adv_data[] = {
 /* Task handle */
 __RETAINED_RW static OS_TASK ble_task_handle = NULL;
 
-
-
-/*
- * @brief Read request callback
- *
- * This callback is fired when a peer device issues a read request. This implies that
- * that the peer device wants to read the Characteristic Attribute value. User should
- * provide the requested data.
- *
- * \param [in] value: The value returned back to the peer device
- *
- * \param [in] length: The number of bytes/octets returned
- *
- *
- * \warning: The callback function should have that specific prototype
- *
- * \warning: The BLE stack will not proceed with the next BLE event until the
- *        callback returns.
- */
-void get_var_value_cb(uint8_t **value, uint16_t *length)
-{
-
-        /* Return the requested data back to the peer device */
-        *value  = _characteristic_attr_val;       // A pointer that points to the returned data
-        *length = sizeof(CHARACTERISTIC_ATTR_VALUE_MAX_BYTES);  // The size of the returned data, expressed in bytes.
-
-        /*
-         * This is just for debugging/demonstration purposes. UART is a slow interface
-         * and will add significant delays compared to BLE speeds.
-         */
-#if (DBG_SERIAL_CONSOLE_ENABLE == 1)
-        printf("\nRead callback function hit! - Returned value: %s\n\r", (char *)_characteristic_attr_val);
-#endif
-}
-
-
-/*
- *
- * @brief Write request callback
- *
- * This callback is fired when a peer device issues a write request. This implies that
- * the peer device requested to modify the Characteristic Attribute value.
- *
- * \param [out] value:  The value written by the peer device.
- *
- * \param [out] length: The length of the written value, expressed in bytes/octets.
- *
- *
- * \warning: The callback function should have that specific prototype
- *
- * \warning: The BLE stack will not proceed with the next BLE event until the
- *        callback returns.
- *
- */
-void set_var_value_cb(const uint8_t *value, uint16_t length)
-{
-        /* Clear the current Characteristic Attribute value */
-        memset((void *)_characteristic_attr_val, 0x20, sizeof(_characteristic_attr_val));
-
-        /* Update the Characteristic Attribute value as requested by the peer device */
-        memcpy((void *)_characteristic_attr_val, (void *)value, length);
-
-        /*
-         * This is just for debugging/demonstration purposes. UART is a slow interface
-         * and will add significant delays compared to BLE speeds.
-         */
-#if (DBG_SERIAL_CONSOLE_ENABLE == 1)
-        printf("\nWrite callback function hit! - Written value: %s, length: %d\n\r",
-                                                        _characteristic_attr_val, length);
-#endif
-}
 
 
 /*
@@ -199,6 +121,23 @@ void event_sent_cb(uint16_t conn_idx, bool status, gatt_event_t type)
 #endif
 }
 
+/*
+ * @brief Read request callback
+ *
+ * This callback is fired when a peer device issues a read request. This implies that
+ * that the peer device wants to read the Characteristic Attribute value. User should
+ * provide the requested data.
+ *
+ * \param [in] value: The value returned back to the peer device
+ *
+ * \param [in] length: The number of bytes/octets returned
+ *
+ *
+ * \warning: The callback function should have that specific prototype
+ *
+ * \warning: The BLE stack will not proceed with the next BLE event until the
+ *        callback returns.
+ */
 void get_temperature_value_cb(uint8_t **value, uint16_t *length)
 {
         uint32_t return_value;
@@ -351,58 +290,33 @@ void ble_peripheral_task(void *params)
         printf("New MTU size: %d, Status: %d\n\r", mtu_size, mtu_err);
 #endif
 
+        //************ Characteristic declarations for the sensor_data BLE Service *************
+        const mcs_characteristic_config_t sensor_data_service[] = {
 
-        //************ Characteristic declarations for the 1st custom BLE Service  *************
-        const mcs_characteristic_config_t custom_service_1[] = {
-
-                /* Initialized Characteristic Attribute */
-                CHARACTERISTIC_DECLARATION(11111111-0000-0000-0000-000000000001, CHARACTERISTIC_ATTR_VALUE_MAX_BYTES,
-                        CHAR_WRITE_PROP_EN, CHAR_READ_PROP_EN, CHAR_NOTIF_INDIC_EN, Initialized Characteristic,
-                                                        get_var_value_cb, set_var_value_cb, event_sent_cb),
-
-
-                 // -----------------------------------------------------------------
-                 // -- Here you can continue adding more Characteristic Attributes --
-                 // -----------------------------------------------------------------
-
-
-        };
-        // ***************** Register the Bluetooth Service in Dialog BLE framework *****************
-        SERVICE_DECLARATION(custom_service_1, 11111111-0000-0000-0000-111111111111)
-
-
-
-        //************ Characteristic declarations for the 2nd BLE Service *************
-        const mcs_characteristic_config_t custom_service_2[] = {
-
-                /* Uninitialized Characteristic Attribute. You can defined your preferred settings */
+                /* Temperature Characteristic Attribute */
                 CHARACTERISTIC_DECLARATION(22222222-0000-0000-0000-000000000001, 0,
                           CHAR_WRITE_PROP_DIS, CHAR_READ_PROP_EN, CHAR_NOTIF_NONE, Temperature,
                                                                                    get_temperature_value_cb, NULL,NULL),
 
 
-                /* Uninitialized Characteristic Attribute. You can defined your preferred settings */
+                /* Humidity Characteristic Attribute */
                 CHARACTERISTIC_DECLARATION(22222222-0000-0000-0000-000000000002, 0,
                           CHAR_WRITE_PROP_DIS, CHAR_READ_PROP_EN, CHAR_NOTIF_NONE, Humidity,
                                                                                      get_humidity_value_cb, NULL, NULL),
 
 
-               /* Uninitialized Characteristic Attribute. You can defined your preferred settings */
+               /* Water Characteristic Attribute */
                CHARACTERISTIC_DECLARATION(22222222-0000-0000-0000-000000000003, 0,
                           CHAR_WRITE_PROP_DIS, CHAR_READ_PROP_EN, CHAR_NOTIF_NONE, Water,
                                                                                     get_water_value_cb, NULL, NULL),
 
 
-                // -----------------------------------------------------------------
-                // -- Here you can continue adding more Characteristic attributes --
-                // -----------------------------------------------------------------
-
        };
        // ****************** Register the Bluetooth Service in Dialog BLE framework *****************
-       SERVICE_DECLARATION(custom_service_2, 22222222-0000-0000-0000-222222222222)
+       SERVICE_DECLARATION(sensor_data_service, 22222222-0000-0000-0000-222222222222)
 
 
-
+        /* Set advertising data and start advertising */
         ble_gap_adv_ad_struct_set(ARRAY_LENGTH(adv_data), adv_data, 1 , scan_rsp);
         ble_gap_adv_start(GAP_CONN_MODE_UNDIRECTED);
 
