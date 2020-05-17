@@ -88,11 +88,11 @@
  */
 #define CONFIG_USE_BLE_SERVICES
 
-#define dg_configBLE_CENTRAL                    ( 0 )
-#define dg_configBLE_GATT_CLIENT                ( 0 )
-#define dg_configBLE_OBSERVER                   ( 0 )
-#define dg_configBLE_BROADCASTER                ( 0 )
-#define dg_configBLE_L2CAP_COC                  ( 0 )
+#define dg_configBLE_CENTRAL                    ( 1 )
+#define dg_configBLE_GATT_CLIENT                ( 1 )
+#define dg_configBLE_OBSERVER                   ( 1 )
+#define dg_configBLE_BROADCASTER                ( 1 )
+#define dg_configBLE_L2CAP_COC                  ( 1 )
 
 /* Include bsp default values */
 #include "bsp_defaults.h"
