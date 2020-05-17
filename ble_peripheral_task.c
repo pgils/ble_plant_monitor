@@ -61,6 +61,16 @@
 #define CHARACTERISTIC_ATTR_VALUE_MAX_BYTES       (50)
 
 /*
+ * BLE scan defaults
+ */
+#define CFG_SCAN_TYPE           (GAP_SCAN_ACTIVE)
+#define CFG_SCAN_MODE           (GAP_SCAN_GEN_DISC_MODE)
+#define CFG_SCAN_INTERVAL       BLE_SCAN_INTERVAL_FROM_MS(0x64)
+#define CFG_SCAN_WINDOW         BLE_SCAN_WINDOW_FROM_MS(0x32)
+#define CFG_SCAN_FILT_WLIST     (false)
+#define CFG_SCAN_FILT_DUPLT     (false)
+
+/*
  * Arrays used for holding the value of the Characteristic Attributes registered
  * in Dialog BLE database.
  */
@@ -200,6 +210,34 @@ void get_water_value_cb(uint8_t **value, uint16_t *length)
 /*
  * Main code
  */
+
+/*
+ * Handler for ble_gap_scan_start call.
+ * Initiates a scan procedure.
+ * Prints scan parameters and status returned by call
+ */
+static bool gap_scan_start()
+{
+        ble_error_t status;
+        gap_scan_params_t scan_params;
+        gap_scan_type_t type = CFG_SCAN_TYPE;
+        gap_scan_mode_t mode = CFG_SCAN_MODE;
+        bool filt_dup = CFG_SCAN_FILT_DUPLT;
+        bool wlist = CFG_SCAN_FILT_WLIST;
+        uint16_t interval, window;
+
+        ble_gap_scan_params_get(&scan_params);
+
+        window = scan_params.window;
+        interval = scan_params.interval;
+
+        status = ble_gap_scan_start(type, mode, interval, window, wlist, filt_dup);
+
+        printf("BlueTanist node scan started\r\n");
+
+        return true;
+}
+
 static void handle_evt_gap_connected(ble_evt_gap_connected_t *evt)
 {
         /*
@@ -220,7 +258,49 @@ static void handle_evt_gap_adv_completed(ble_evt_gap_adv_completed_t *evt)
         ble_gap_adv_start(GAP_CONN_MODE_UNDIRECTED);
 }
 
+/*
+ * Print GAP advertising report event information
+ * Whitelist management API is not present in this SDK release. so we scan for all devices
+ * and filter them manually.
+ */
+void handle_ble_evt_gap_adv_report(const ble_evt_gap_adv_report_t *info)
+{
+        int i;
+        int offset;
 
+        // the tail of the adv info is AD flags. Get the offset where the actual id starts.
+        offset = info->length - adv_data->len;
+
+        // compare the device advertised UUID against our advertised UUID
+        for (i = info->length-1; i >= offset; i--) {
+                if(info->data[i] != adv_data->data[i-offset]) {
+                        return;
+                }
+        }
+        printf("BlueTanist node found: [%s]\r\n", ble_address_to_string(&info->address));
+}
+
+/*
+ * Print GAP scan completed event information
+ */
+void handle_ble_evt_gap_scan_completed(const ble_evt_gap_scan_completed_t *info)
+{
+        printf("BlueTanist node scan completed\r\n");
+}
+
+bool pmp_ble_handle_event(const ble_evt_hdr_t *evt)
+{
+        switch (evt->evt_code) {
+        case BLE_EVT_GAP_ADV_REPORT:
+                handle_ble_evt_gap_adv_report((ble_evt_gap_adv_report_t *) evt);
+                break;
+        case BLE_EVT_GAP_SCAN_COMPLETED:
+                handle_ble_evt_gap_scan_completed((ble_evt_gap_scan_completed_t *) evt);
+                break;
+        }
+
+        return false;
+}
 
 void ble_peripheral_task(void *params)
 {
@@ -358,6 +438,10 @@ void ble_peripheral_task(void *params)
                         hdr = ble_get_event(false);
                         if (!hdr) {
                                 goto no_event;
+                        }
+
+                        if (pmp_ble_handle_event(hdr)) {
+                                goto handled;
                         }
 
                         if (ble_service_handle_event(hdr)) {
