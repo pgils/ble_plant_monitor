@@ -36,7 +36,7 @@
 /*************************************************************************************************\
  * System configuration
  */
-#define dg_configUSE_LP_CLK                     ( LP_CLK_32768 )
+#define dg_configUSE_LP_CLK                     ( LP_CLK_RCX )
 #define dg_configCODE_LOCATION                  ( NON_VOLATILE_IS_NONE )
 #define dg_configEMULATE_OTP_COPY               ( 0 )
 //#define dg_configUSER_CAN_USE_TIMER1            ( 0 )

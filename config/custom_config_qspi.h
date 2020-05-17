@@ -36,7 +36,7 @@
 /*************************************************************************************************\
  * System configuration
  */
-#define dg_configUSE_LP_CLK                     ( LP_CLK_32768 )
+#define dg_configUSE_LP_CLK                     ( LP_CLK_RCX )
 #define dg_configEXEC_MODE                      ( MODE_IS_CACHED )
 #define dg_configCODE_LOCATION                  ( NON_VOLATILE_IS_FLASH )
 #define dg_configEMULATE_OTP_COPY               ( 0 )
