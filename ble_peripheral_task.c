@@ -240,9 +240,7 @@ static bool gap_scan_start()
 
 static void handle_evt_gap_connected(ble_evt_gap_connected_t *evt)
 {
-        /*
-         * Manage connection information
-         */
+        gap_scan_start();
 }
 
 static void handle_evt_gap_disconnected(ble_evt_gap_disconnected_t *evt)
