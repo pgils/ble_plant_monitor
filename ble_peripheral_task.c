@@ -246,7 +246,16 @@ void ble_peripheral_task(void *params)
 
         srand(time(NULL));
 
-        ble_peripheral_start();
+        ble_error_t status;
+
+        status = ble_enable();
+
+        if (status == BLE_STATUS_OK) {
+                ble_gap_role_set(GAP_PERIPHERAL_ROLE | GAP_CENTRAL_ROLE);
+        } else {
+                printf("%s: failed. Status=%d\r\n", __func__, status);
+        }
+
         ble_register_app();
 
         /* Get device name from DEVICE_NAME */
