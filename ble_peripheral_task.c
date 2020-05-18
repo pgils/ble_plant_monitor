@@ -83,6 +83,11 @@
         }
 
 /*
+ * Function prototypes
+ */
+static bool gap_scan_start(void);
+
+/*
  * Arrays used for holding the value of the Characteristic Attributes registered
  * in Dialog BLE database.
  */
@@ -153,6 +158,26 @@ void event_sent_cb(uint16_t conn_idx, bool status, gatt_event_t type)
                                                                 conn_idx, status, type);
 #endif
 }
+
+/*
+ *
+ * @brief Write start node scan callback
+ *
+ * \param [out] value:  >0 initiates a BLE scan
+ *
+ * \param [out] length: always 1
+ *
+ */
+void set_var_start_scan(const uint8_t *value, uint16_t length)
+{
+        if(*value <= 0) {
+                // TODO: disconnect all slave nodes
+                return;
+        }
+        printf("Received 'start scan' command.\r\n");
+        gap_scan_start();
+}
+
 
 /*
  * @brief Read request callback
@@ -282,8 +307,6 @@ static void handle_evt_gap_connected(ble_evt_gap_connected_t *evt)
 {
         printf("gap connected: %s\r\n", ble_address_to_string(&evt->peer_address));
         printf("my address: %s\r\n", ble_address_to_string(&evt->own_addr));
-
-        gap_scan_start();
 }
 
 static void handle_evt_gap_disconnected(ble_evt_gap_disconnected_t *evt)
@@ -372,6 +395,7 @@ void ble_peripheral_task(void *params)
 {
         int8_t wdog_id;
         ble_service_t *svc;
+        ble_error_t status;
 
         uint16_t name_len;
         char name_buf[MAX_NAME_LEN + 1];        /* 1 byte for '\0' character */
@@ -392,10 +416,9 @@ void ble_peripheral_task(void *params)
 
         srand(time(NULL));
 
-        ble_error_t status;
-
         status = ble_enable();
 
+        // enable both peripheral and central roles for master/slave node configurations
         if (status == BLE_STATUS_OK) {
                 ble_gap_role_set(GAP_PERIPHERAL_ROLE | GAP_CENTRAL_ROLE);
         } else {
@@ -444,6 +467,18 @@ void ble_peripheral_task(void *params)
         mtu_err = ble_gap_mtu_size_get(&mtu_size);
         printf("New MTU size: %d, Status: %d\n\r", mtu_size, mtu_err);
 #endif
+
+        //************ Characteristic declarations for the master node init Service  *************
+        const mcs_characteristic_config_t master_node_service[] = {
+
+                /* Start scan Attribute */
+                CHARACTERISTIC_DECLARATION(11111111-0000-0000-0000-000000000001, CHARACTERISTIC_ATTR_VALUE_MAX_BYTES,
+                        CHAR_WRITE_PROP_EN, CHAR_READ_PROP_DIS, CHAR_NOTIF_NONE, Start Scan,
+                                                        NULL, set_var_start_scan, NULL),
+
+        };
+        // ***************** Register the Bluetooth Service in Dialog BLE framework *****************
+        SERVICE_DECLARATION(master_node_service, 11111111-0000-0000-0000-111111111111)
 
         //************ Characteristic declarations for the sensor_data BLE Service *************
         const mcs_characteristic_config_t sensor_data_service[] = {
