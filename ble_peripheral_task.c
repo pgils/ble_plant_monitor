@@ -20,6 +20,7 @@
 #include "osal.h"
 #include "time.h"
 #include "sys_watchdog.h"
+#include "sdk_list.h"
 #include "ble_att.h"
 #include "ble_common.h"
 #include "ble_gap.h"
@@ -70,6 +71,17 @@
 #define CFG_SCAN_FILT_WLIST     (false)
 #define CFG_SCAN_FILT_DUPLT     (false)
 
+/**
+ * Default connection parameters
+ */
+#define CFG_CONN_PARAMS                                         \
+        {                                                       \
+                .interval_min = 0x28,                           \
+                .interval_max = 0x38,                           \
+                .slave_latency = 0,                             \
+                .sup_timeout = 0x2a,                            \
+        }
+
 /*
  * Arrays used for holding the value of the Characteristic Attributes registered
  * in Dialog BLE database.
@@ -77,6 +89,9 @@
 __RETAINED_RW uint8_t _temperature_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 __RETAINED_RW uint8_t _humidity_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 __RETAINED_RW uint8_t _water_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
+
+/* List of devices waiting for connection */
+__RETAINED static void *node_devices;
 
 
 
@@ -88,6 +103,14 @@ static const gap_adv_ad_struct_t adv_data[] = {
                                 0x00, 0x00, 0x00, 0x90, 0x06, 0x42,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x11, 0x11, 0x11, 0x11)
+};
+
+/*
+ * device node list item for linked list
+ */
+struct node_list_elem {
+        struct node_list_elem *next;
+        bd_address_t addr;
 };
 
 /* Task handle */
@@ -233,13 +256,33 @@ static bool gap_scan_start()
 
         status = ble_gap_scan_start(type, mode, interval, window, wlist, filt_dup);
 
-        printf("BlueTanist node scan started\r\n");
+        printf("BlueTanist node scan started [%d]\r\n", status);
+
+        return true;
+}
+
+/*
+ * Handler for ble_gap_connect call.
+ * Initiates a direct connection procedure to a specified peer device.
+ */
+static bool gap_connect(const bd_address_t *addr)
+{
+        ble_error_t status;
+        gap_conn_params_t params = CFG_CONN_PARAMS;
+
+        printf("connecting to: %s\r\n", ble_address_to_string(addr));
+        status = ble_gap_connect(addr, &params);
+
+        printf("connect status: %d\r\n", status);
 
         return true;
 }
 
 static void handle_evt_gap_connected(ble_evt_gap_connected_t *evt)
 {
+        printf("gap connected: %s\r\n", ble_address_to_string(&evt->peer_address));
+        printf("my address: %s\r\n", ble_address_to_string(&evt->own_addr));
+
         gap_scan_start();
 }
 
@@ -261,7 +304,7 @@ static void handle_evt_gap_adv_completed(ble_evt_gap_adv_completed_t *evt)
  * Whitelist management API is not present in this SDK release. so we scan for all devices
  * and filter them manually.
  */
-void handle_ble_evt_gap_adv_report(const ble_evt_gap_adv_report_t *info)
+void handle_ble_evt_gap_adv_report(ble_evt_gap_adv_report_t *info)
 {
         int i;
         int offset;
@@ -276,6 +319,11 @@ void handle_ble_evt_gap_adv_report(const ble_evt_gap_adv_report_t *info)
                 }
         }
         printf("BlueTanist node found: [%s]\r\n", ble_address_to_string(&info->address));
+
+        // append the node to the linked list for later connection
+        struct node_list_elem *node = OS_MALLOC(sizeof(*node));
+        memcpy(&node->addr, &info->address, sizeof(node->addr));
+        list_add(&node_devices, node);
 }
 
 /*
@@ -283,7 +331,25 @@ void handle_ble_evt_gap_adv_report(const ble_evt_gap_adv_report_t *info)
  */
 void handle_ble_evt_gap_scan_completed(const ble_evt_gap_scan_completed_t *info)
 {
-        printf("BlueTanist node scan completed\r\n");
+        struct node_list_elem *element;
+
+        printf("BlueTanist node scan completed. Found %d nodes\r\n", list_size(node_devices));
+
+        // connect all found nodes
+        while(node_devices != NULL) {
+                element = (struct node_list_elem *) list_pop_back(&node_devices);
+                gap_connect(&element->addr);
+                OS_FREE(element);
+        }
+}
+
+/*
+ * Print GAP connection completed event information
+ */
+static void handle_ble_evt_gap_connection_completed(const ble_evt_gap_connection_completed_t *info)
+{
+        printf("BLE_EVT_GAP_CONNECTION_COMPLETED\r\n");
+        printf("Status: 0x%02x\r\n", info->status);
 }
 
 bool pmp_ble_handle_event(const ble_evt_hdr_t *evt)
@@ -295,8 +361,10 @@ bool pmp_ble_handle_event(const ble_evt_hdr_t *evt)
         case BLE_EVT_GAP_SCAN_COMPLETED:
                 handle_ble_evt_gap_scan_completed((ble_evt_gap_scan_completed_t *) evt);
                 break;
+        case BLE_EVT_GAP_CONNECTION_COMPLETED:
+                handle_ble_evt_gap_connection_completed((ble_evt_gap_connection_completed_t *) evt);
+                break;
         }
-
         return false;
 }
 

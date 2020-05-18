@@ -42,7 +42,7 @@
 #define dg_configEMULATE_OTP_COPY               ( 0 )
 //#define dg_configUSER_CAN_USE_TIMER1            ( 0 )
 
-#define dg_configUSE_WDOG                       ( 0 )
+#define dg_configUSE_WDOG                       ( 1 )
 
 #define dg_configFLASH_CONNECTED_TO             ( FLASH_CONNECTED_TO_1V8 )
 #define dg_configFLASH_POWER_DOWN               ( 0 )
@@ -81,6 +81,9 @@
 #define dg_configI2C_ADAPTER                    ( 1 )
 #define dg_configUSE_HW_I2C                     ( 1 )
 
+/* RF is not accessed by SysCPU in DA1469x */
+#define dg_configRF_ENABLE_RECALIBRATION        ( 1 )
+
 /*************************************************************************************************\
  * Sensor configuration
  */
@@ -98,6 +101,10 @@
 #define dg_configBLE_OBSERVER                   ( 1 )
 #define dg_configBLE_BROADCASTER                ( 1 )
 #define dg_configBLE_L2CAP_COC                  ( 1 )
+
+#define defaultBLE_ATT_DB_CONFIGURATION         ( 0x30 )
+#define CFG_AUTO_CONN_PARAM_REPLY               ( 1 )
+#define CFG_AUTO_PAIR_REPLY                     ( 1 )
 
 /* Include bsp default values */
 #include "bsp_defaults.h"
