@@ -292,13 +292,12 @@ static bool gap_scan_start()
  */
 static bool gap_connect(const bd_address_t *addr)
 {
-        ble_error_t status;
         gap_conn_params_t params = CFG_CONN_PARAMS;
 
         printf("connecting to: %s\r\n", ble_address_to_string(addr));
-        status = ble_gap_connect(addr, &params);
 
-        printf("connect status: %d\r\n", status);
+        // keep trying if busy connecting other node
+        while(BLE_ERROR_BUSY == ble_gap_connect(addr, &params));
 
         return true;
 }
