@@ -20,6 +20,7 @@
 #include "osal.h"
 #include "time.h"
 #include "sys_watchdog.h"
+#include "sdk_list.h"
 #include "ble_att.h"
 #include "ble_common.h"
 #include "ble_gap.h"
@@ -61,12 +62,41 @@
 #define CHARACTERISTIC_ATTR_VALUE_MAX_BYTES       (50)
 
 /*
+ * BLE scan defaults
+ */
+#define CFG_SCAN_TYPE           (GAP_SCAN_ACTIVE)
+#define CFG_SCAN_MODE           (GAP_SCAN_GEN_DISC_MODE)
+#define CFG_SCAN_INTERVAL       BLE_SCAN_INTERVAL_FROM_MS(0x64)
+#define CFG_SCAN_WINDOW         BLE_SCAN_WINDOW_FROM_MS(0x32)
+#define CFG_SCAN_FILT_WLIST     (false)
+#define CFG_SCAN_FILT_DUPLT     (false)
+
+/**
+ * Default connection parameters
+ */
+#define CFG_CONN_PARAMS                                         \
+        {                                                       \
+                .interval_min = 0x28,                           \
+                .interval_max = 0x38,                           \
+                .slave_latency = 0,                             \
+                .sup_timeout = 0x2a,                            \
+        }
+
+/*
+ * Function prototypes
+ */
+static bool gap_scan_start(void);
+
+/*
  * Arrays used for holding the value of the Characteristic Attributes registered
  * in Dialog BLE database.
  */
 __RETAINED_RW uint8_t _temperature_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 __RETAINED_RW uint8_t _humidity_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
 __RETAINED_RW uint8_t _water_attr_val[CHARACTERISTIC_ATTR_VALUE_MAX_BYTES] = { 0 };
+
+/* List of devices waiting for connection */
+__RETAINED static void *node_devices;
 
 
 
@@ -78,6 +108,14 @@ static const gap_adv_ad_struct_t adv_data[] = {
                                 0x00, 0x00, 0x00, 0x90, 0x06, 0x42,
                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                 0x11, 0x11, 0x11, 0x11)
+};
+
+/*
+ * device node list item for linked list
+ */
+struct node_list_elem {
+        struct node_list_elem *next;
+        bd_address_t addr;
 };
 
 /* Task handle */
@@ -120,6 +158,26 @@ void event_sent_cb(uint16_t conn_idx, bool status, gatt_event_t type)
                                                                 conn_idx, status, type);
 #endif
 }
+
+/*
+ *
+ * @brief Write start node scan callback
+ *
+ * \param [out] value:  >0 initiates a BLE scan
+ *
+ * \param [out] length: always 1
+ *
+ */
+void set_var_start_scan(const uint8_t *value, uint16_t length)
+{
+        if(*value <= 0) {
+                // TODO: disconnect all slave nodes
+                return;
+        }
+        printf("Received 'start scan' command.\r\n");
+        gap_scan_start();
+}
+
 
 /*
  * @brief Read request callback
@@ -200,11 +258,55 @@ void get_water_value_cb(uint8_t **value, uint16_t *length)
 /*
  * Main code
  */
+
+/*
+ * Handler for ble_gap_scan_start call.
+ * Initiates a scan procedure.
+ * Prints scan parameters and status returned by call
+ */
+static bool gap_scan_start()
+{
+        ble_error_t status;
+        gap_scan_params_t scan_params;
+        gap_scan_type_t type = CFG_SCAN_TYPE;
+        gap_scan_mode_t mode = CFG_SCAN_MODE;
+        bool filt_dup = CFG_SCAN_FILT_DUPLT;
+        bool wlist = CFG_SCAN_FILT_WLIST;
+        uint16_t interval, window;
+
+        ble_gap_scan_params_get(&scan_params);
+
+        window = scan_params.window;
+        interval = scan_params.interval;
+
+        status = ble_gap_scan_start(type, mode, interval, window, wlist, filt_dup);
+
+        printf("BlueTanist node scan started [%d]\r\n", status);
+
+        return true;
+}
+
+/*
+ * Handler for ble_gap_connect call.
+ * Initiates a direct connection procedure to a specified peer device.
+ */
+static bool gap_connect(const bd_address_t *addr)
+{
+        ble_error_t status;
+        gap_conn_params_t params = CFG_CONN_PARAMS;
+
+        printf("connecting to: %s\r\n", ble_address_to_string(addr));
+        status = ble_gap_connect(addr, &params);
+
+        printf("connect status: %d\r\n", status);
+
+        return true;
+}
+
 static void handle_evt_gap_connected(ble_evt_gap_connected_t *evt)
 {
-        /*
-         * Manage connection information
-         */
+        printf("gap connected: %s\r\n", ble_address_to_string(&evt->peer_address));
+        printf("my address: %s\r\n", ble_address_to_string(&evt->own_addr));
 }
 
 static void handle_evt_gap_disconnected(ble_evt_gap_disconnected_t *evt)
@@ -220,12 +322,80 @@ static void handle_evt_gap_adv_completed(ble_evt_gap_adv_completed_t *evt)
         ble_gap_adv_start(GAP_CONN_MODE_UNDIRECTED);
 }
 
+/*
+ * Print GAP advertising report event information
+ * Whitelist management API is not present in this SDK release. so we scan for all devices
+ * and filter them manually.
+ */
+void handle_ble_evt_gap_adv_report(ble_evt_gap_adv_report_t *info)
+{
+        int i;
+        int offset;
 
+        // the tail of the adv info is AD flags. Get the offset where the actual id starts.
+        offset = info->length - adv_data->len;
+
+        // compare the device advertised UUID against our advertised UUID
+        for (i = info->length-1; i >= offset; i--) {
+                if(info->data[i] != adv_data->data[i-offset]) {
+                        return;
+                }
+        }
+        printf("BlueTanist node found: [%s]\r\n", ble_address_to_string(&info->address));
+
+        // append the node to the linked list for later connection
+        struct node_list_elem *node = OS_MALLOC(sizeof(*node));
+        memcpy(&node->addr, &info->address, sizeof(node->addr));
+        list_add(&node_devices, node);
+}
+
+/*
+ * Print GAP scan completed event information
+ */
+void handle_ble_evt_gap_scan_completed(const ble_evt_gap_scan_completed_t *info)
+{
+        struct node_list_elem *element;
+
+        printf("BlueTanist node scan completed. Found %d nodes\r\n", list_size(node_devices));
+
+        // connect all found nodes
+        while(node_devices != NULL) {
+                element = (struct node_list_elem *) list_pop_back(&node_devices);
+                gap_connect(&element->addr);
+                OS_FREE(element);
+        }
+}
+
+/*
+ * Print GAP connection completed event information
+ */
+static void handle_ble_evt_gap_connection_completed(const ble_evt_gap_connection_completed_t *info)
+{
+        printf("BLE_EVT_GAP_CONNECTION_COMPLETED\r\n");
+        printf("Status: 0x%02x\r\n", info->status);
+}
+
+bool pmp_ble_handle_event(const ble_evt_hdr_t *evt)
+{
+        switch (evt->evt_code) {
+        case BLE_EVT_GAP_ADV_REPORT:
+                handle_ble_evt_gap_adv_report((ble_evt_gap_adv_report_t *) evt);
+                break;
+        case BLE_EVT_GAP_SCAN_COMPLETED:
+                handle_ble_evt_gap_scan_completed((ble_evt_gap_scan_completed_t *) evt);
+                break;
+        case BLE_EVT_GAP_CONNECTION_COMPLETED:
+                handle_ble_evt_gap_connection_completed((ble_evt_gap_connection_completed_t *) evt);
+                break;
+        }
+        return false;
+}
 
 void ble_peripheral_task(void *params)
 {
         int8_t wdog_id;
         ble_service_t *svc;
+        ble_error_t status;
 
         uint16_t name_len;
         char name_buf[MAX_NAME_LEN + 1];        /* 1 byte for '\0' character */
@@ -246,7 +416,15 @@ void ble_peripheral_task(void *params)
 
         srand(time(NULL));
 
-        ble_peripheral_start();
+        status = ble_enable();
+
+        // enable both peripheral and central roles for master/slave node configurations
+        if (status == BLE_STATUS_OK) {
+                ble_gap_role_set(GAP_PERIPHERAL_ROLE | GAP_CENTRAL_ROLE);
+        } else {
+                printf("%s: failed. Status=%d\r\n", __func__, status);
+        }
+
         ble_register_app();
 
         /* Get device name from DEVICE_NAME */
@@ -289,6 +467,18 @@ void ble_peripheral_task(void *params)
         mtu_err = ble_gap_mtu_size_get(&mtu_size);
         printf("New MTU size: %d, Status: %d\n\r", mtu_size, mtu_err);
 #endif
+
+        //************ Characteristic declarations for the master node init Service  *************
+        const mcs_characteristic_config_t master_node_service[] = {
+
+                /* Start scan Attribute */
+                CHARACTERISTIC_DECLARATION(11111111-0000-0000-0000-000000000001, CHARACTERISTIC_ATTR_VALUE_MAX_BYTES,
+                        CHAR_WRITE_PROP_EN, CHAR_READ_PROP_DIS, CHAR_NOTIF_NONE, Start Scan,
+                                                        NULL, set_var_start_scan, NULL),
+
+        };
+        // ***************** Register the Bluetooth Service in Dialog BLE framework *****************
+        SERVICE_DECLARATION(master_node_service, 11111111-0000-0000-0000-111111111111)
 
         //************ Characteristic declarations for the sensor_data BLE Service *************
         const mcs_characteristic_config_t sensor_data_service[] = {
@@ -349,6 +539,10 @@ void ble_peripheral_task(void *params)
                         hdr = ble_get_event(false);
                         if (!hdr) {
                                 goto no_event;
+                        }
+
+                        if (pmp_ble_handle_event(hdr)) {
+                                goto handled;
                         }
 
                         if (ble_service_handle_event(hdr)) {
