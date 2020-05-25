@@ -35,20 +35,6 @@
 #include "ble_custom_service.h"
 #include "ble_bluetanist_common.h"
 
-
-/* Task priorities */
-#define periphBLE_CENTRAL_TASK_PRIORITY        ( OS_TASK_PRIORITY_NORMAL )
-
-/*
- * Task handles
- */
-__RETAINED static OS_TASK prvBLECentral_h = NULL;
-
-/*
- * Task functions .
- */
-void ble_central_task(void *params);
-
 /*
  * Flag whether this node acts as a Master node
  */
