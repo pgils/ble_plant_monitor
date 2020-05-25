@@ -231,8 +231,32 @@ void handle_ble_evt_gap_scan_completed(const ble_evt_gap_scan_completed_t *info)
  */
 void handle_ble_evt_gattc_discover_svc(const ble_evt_gattc_discover_svc_t *info)
 {
+        ble_error_t status;
+
         // sensor data service discovered, scan for attributes
-        printf("service discovered: %s\r\n", ble_uuid_to_string(&info->uuid));
+        printf("service discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
+        status = ble_gattc_discover_char(info->conn_idx, info->start_h, info->end_h, NULL);
+}
+
+/*
+ * Handle characteristic discovered
+ */
+void handle_ble_evt_gattc_discover_char(const ble_evt_gattc_discover_char_t *info)
+{
+        ble_error_t status;
+
+        printf("characteristic discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
+        status = ble_gattc_read(info->conn_idx, info->handle, 0);
+}
+
+/*
+ * Handle characteristic data retrieved
+ */
+void handle_ble_evt_gattc_read_completed(ble_evt_gattc_read_completed_t *info)
+{
+        ble_error_t status;
+
+        printf("characteritic read for %d, length: %d\r\n", info->conn_idx, info->length);
 }
 
 bool pmp_ble_handle_event(const ble_evt_hdr_t *evt)
@@ -250,6 +274,11 @@ bool pmp_ble_handle_event(const ble_evt_hdr_t *evt)
         case BLE_EVT_GATTC_DISCOVER_SVC:
                 handle_ble_evt_gattc_discover_svc((ble_evt_gattc_discover_svc_t *) evt);
                 break;
+        case BLE_EVT_GATTC_DISCOVER_CHAR:
+                handle_ble_evt_gattc_discover_char((ble_evt_gattc_discover_char_t *) evt);
+                break;
+        case BLE_EVT_GATTC_READ_COMPLETED:
+                handle_ble_evt_gattc_read_completed((ble_evt_gattc_read_completed_t *) evt);
         }
         return false;
 }
