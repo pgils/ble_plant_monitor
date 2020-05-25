@@ -30,6 +30,7 @@
 
 /*
  * UUID's for common node services and attributes
+ * TODO: use these; they do not work with the macro's
  */
 #define NODE_DATA_SVC_UUID      22222222-0000-0000-0000-222222222222
 #define NODE_DATA_ATTR_TEMP     22222222-0000-0000-0000-000000000001
