@@ -138,8 +138,13 @@ void ble_peripheral_task(void *params)
         /* Scan Response object to be populated with <Complete Local Name> AD type */
         gap_adv_ad_struct_t *scan_rsp;
 
+        /* Own BT address */
+        own_address_t my_addr;
+        ble_gap_address_get(&my_addr);
+
         printf("\n\r*** %s started ***\n\r", DEVICE_NAME);
-        printf("*** Firmware %s ***\n\n\r", FW_VERSION);
+        printf("*** Firmware %s ***\n\r", FW_VERSION);
+        printf("*** My address is %s ***\n\n\r", ble_address_to_string((bd_address_t*)&my_addr));
 
         // in case services which do not use svc are all disabled, just suppress -Wunused-variable
         (void) svc;
