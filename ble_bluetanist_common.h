@@ -19,7 +19,7 @@
 /*
  * The device's advertised name
  */
-#define DEVICE_NAME     "BlueTanist Node-dev"
+#define DEVICE_NAME     "BlueTanist Node"
 
 /* Enable/disable changing the default Maximum Protocol Unit (MTU). */
 #define CHANGE_MTU_SIZE_ENABLE        (0)
