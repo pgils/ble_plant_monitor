@@ -249,7 +249,7 @@ void handle_ble_evt_gattc_discover_char(const ble_evt_gattc_discover_char_t *inf
         ble_error_t status;
 
         printf("characteristic discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
-        status = ble_gattc_read(info->conn_idx, info->handle, 0);
+        status = ble_gattc_read(info->conn_idx, info->value_handle, 0);
 }
 
 /*
