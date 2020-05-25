@@ -177,7 +177,10 @@ bool gap_connect(const bd_address_t *addr)
         printf("connecting to: %s\r\n", ble_address_to_string(addr));
 
         // keep trying if busy connecting other node
-        while(BLE_ERROR_BUSY == ble_gap_connect(addr, &params));
+        while(BLE_ERROR_BUSY == ble_gap_connect(addr, &params)) {
+                // Arbitrary delay to not flood the connect
+                OS_DELAY_MS(10);
+        }
 
         return true;
 }
