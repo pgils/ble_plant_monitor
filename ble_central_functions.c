@@ -257,9 +257,16 @@ void handle_ble_evt_gattc_discover_char(const ble_evt_gattc_discover_char_t *inf
  */
 void handle_ble_evt_gattc_read_completed(ble_evt_gattc_read_completed_t *info)
 {
-        ble_error_t status;
+        int i;
 
-        printf("characteritic read for %d, length: %d\r\n", info->conn_idx, info->length);
+        printf("characteristic read for %d, length: %d, value: ", info->conn_idx, info->length);
+        if(info->status == ATT_ERROR_OK)
+        {
+                for (i = 0; i < info->length; ++i) {
+                        printf("%02x", info->value[i]);
+                }
+                printf("\r\n");
+        }
 }
 
 bool pmp_ble_handle_event(const ble_evt_hdr_t *evt)
