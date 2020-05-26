@@ -111,7 +111,7 @@
                                                                            _read_cb, _write_cb, _event_cb)  \
                                                                                                             \
         {                                                                                                   \
-                  .characteristic_128_uuid             = #_characteristic_uuid,                             \
+                  .characteristic_128_uuid             = _characteristic_uuid,                              \
                   .characteristic_max_size             = _characteristic_max_size,                          \
                   .characteristic_write_prop           = _write_prop,                                       \
                   .characteristic_read_prop            = _read_prop,                                        \
@@ -142,7 +142,7 @@
  *           otherwise an assertion will hit!!!
  */
 #define SERVICE_DECLARATION(_service_settings, _service_uuid)     \
-                        mcs_init( _service_settings, #_service_uuid, (sizeof(_service_settings) / sizeof(_service_settings[0])) );
+                        mcs_init( _service_settings, _service_uuid, (sizeof(_service_settings) / sizeof(_service_settings[0])) );
 
 
 

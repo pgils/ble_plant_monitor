@@ -216,48 +216,47 @@ void ble_peripheral_task(void *params)
         const mcs_characteristic_config_t master_node_service[] = {
 
                 /* Start scan Attribute */
-                CHARACTERISTIC_DECLARATION(11111111-0000-0000-0000-000000000001, CHARACTERISTIC_ATTR_VALUE_MAX_BYTES,
+                CHARACTERISTIC_DECLARATION(NODE_MASTER_ATTR_SET, CHARACTERISTIC_ATTR_VALUE_MAX_BYTES,
                         CHAR_WRITE_PROP_EN, CHAR_READ_PROP_DIS, CHAR_NOTIF_NONE, Set Master,
                                                         NULL, set_master_node_cb, NULL),
 
                 /* Get connected node data Attribute */
-                CHARACTERISTIC_DECLARATION(11111111-0000-0000-0000-000000000010, 0,
+                CHARACTERISTIC_DECLARATION(NODE_MASTER_ATTR_DATA, 0,
                         CHAR_WRITE_PROP_DIS, CHAR_READ_PROP_EN, CHAR_NOTIF_NONE, Get node data,
                                                                                  get_node_data_cb, NULL, NULL),
 
         };
         // ***************** Register the Bluetooth Service in Dialog BLE framework *****************
-        SERVICE_DECLARATION(master_node_service, 11111111-0000-0000-0000-111111111111)
+        SERVICE_DECLARATION(master_node_service, NODE_MASTER_SVC_UUID)
 
         //************ Characteristic declarations for the sensor_data BLE Service *************
         const mcs_characteristic_config_t sensor_data_service[] = {
 
                 /* Temperature Characteristic Attribute */
-                CHARACTERISTIC_DECLARATION(22222222-0000-0000-0000-000000000001, 0,
+                CHARACTERISTIC_DECLARATION(NODE_DATA_ATTR_TEMP, 0,
                           CHAR_WRITE_PROP_DIS, CHAR_READ_PROP_EN, CHAR_NOTIF_NONE, Temperature,
                                                                                    get_temperature_value_cb, NULL,NULL),
 
 
                 /* Humidity Characteristic Attribute */
-                CHARACTERISTIC_DECLARATION(22222222-0000-0000-0000-000000000002, 0,
+                CHARACTERISTIC_DECLARATION(NODE_DATA_ATTR_HUMID, 0,
                           CHAR_WRITE_PROP_DIS, CHAR_READ_PROP_EN, CHAR_NOTIF_NONE, Humidity,
                                                                                      get_humidity_value_cb, NULL, NULL),
 
 
                /* Water Characteristic Attribute */
-               CHARACTERISTIC_DECLARATION(22222222-0000-0000-0000-000000000003, 0,
+               CHARACTERISTIC_DECLARATION(NODE_DATA_ATTR_WATER, 0,
                           CHAR_WRITE_PROP_DIS, CHAR_READ_PROP_EN, CHAR_NOTIF_NONE, Water,
                                                                                     get_water_value_cb, NULL, NULL),
 
 
        };
        // ****************** Register the Bluetooth Service in Dialog BLE framework *****************
-       SERVICE_DECLARATION(sensor_data_service, 22222222-0000-0000-0000-222222222222)
+        SERVICE_DECLARATION(sensor_data_service, NODE_DATA_SVC_UUID)
 
         /* Set advertising data and start advertising */
         ble_gap_adv_ad_struct_set(ARRAY_LENGTH(adv_data), adv_data, 1 , scan_rsp);
         ble_gap_adv_start(GAP_CONN_MODE_UNDIRECTED);
-
 
         for (;;) {
                 OS_BASE_TYPE ret;
