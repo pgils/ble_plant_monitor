@@ -83,18 +83,14 @@ static const gap_adv_ad_struct_t adv_data[] = {
         }
 
 /*
- * node data for storing converted sensor data
+ * sensor attribute
+ * holds handles and converted sensor data
  */
-typedef struct node_data {
-        uint8_t temperature[2];
-        uint8_t humidity[2];
-        uint8_t water[2];
-} node_data;
-
-struct node_list_data_elem {
-        struct node_list_data_elem *next;
-        uint16_t conn_idx;
-        node_data data;
+struct sensor_attr_list_elem {
+        struct sensor_attr_list_elem *next;
+        att_uuid_t uuid;
+        uint16_t handle;
+        uint8_t value[2];
 };
 
 /*
@@ -103,7 +99,11 @@ struct node_list_data_elem {
 struct node_list_elem {
         struct node_list_elem *next;
         bd_address_t addr;
+        uint16_t conn_idx;
+        void *attr_list;
 };
+
+#define NODE_SENSOR_DATA_TRANSFER_SIZE       8
 
 void event_sent_cb(uint16_t conn_idx, bool status, gatt_event_t type);
 void handle_evt_gap_connected(ble_evt_gap_connected_t *evt);
