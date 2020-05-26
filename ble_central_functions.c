@@ -252,7 +252,7 @@ bool gap_connect(const bd_address_t *addr)
         // keep trying if busy connecting other node
         while(BLE_ERROR_BUSY == ble_gap_connect(addr, &params)) {
                 // Arbitrary delay to not flood the connect
-                OS_DELAY_MS(10);
+                OS_DELAY_MS(100);
         }
 
         return true;
