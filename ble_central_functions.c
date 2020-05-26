@@ -36,16 +36,19 @@
 
 
 /* List of devices waiting for connection */
+// TODO: use a queue for this
 __RETAINED static void *node_devices_scanned;
 /* List of devices connected */
 __RETAINED static void *node_devices_connected;
+/* Retained return data array for slave sensor data */
+__RETAINED static uint8_t *node_data;
 
 /*
  * helper function for finding a node by connection id in a linked list
  */
-void *list_find_node(void *head, const uint8_t idx)
+void *list_find_node_by_connid(void *head, const uint8_t idx)
 {
-        struct node_list_data_elem *e = head;
+        struct node_list_elem *e = head;
 
         while (e && !(e->conn_idx == idx)) {
                 e = e->next;
@@ -54,14 +57,80 @@ void *list_find_node(void *head, const uint8_t idx)
         return e;
 }
 
+/*
+ * helper function for finding an attribute list item by handle
+ */
+void *list_find_attr_by_handle(void *head, const uint16_t handle)
+{
+        struct sensor_attr_list_elem *e = head;
+
+        while (e && !(e->handle == handle)) {
+                e = e->next;
+        }
+
+        return e;
+}
+
+void list_foreach_nonconst(void *head, void (* cb) (const void *, void *), void *ud)
+{
+        struct list_elem *e = head;
+
+        while (e) {
+                cb(e, ud);
+                e = e->next;
+        }
+}
+
 void discover_node_service(const void *elem, const void *ud)
 {
         ble_error_t status;
-        const struct node_list_data_elem *node = elem;
+        const struct node_list_elem *node = elem;
         const att_uuid_t *svc_uuid = ud;
 
         printf("discover for: %d\r\n", node->conn_idx);
         status = ble_gattc_discover_svc(node->conn_idx, svc_uuid);
+}
+
+void copy_attribute_value(const void *elem, void *ud)
+{
+        const struct sensor_attr_list_elem *attr = elem;
+        uint8_t *target = ud;
+        uint16_t offset = 0;
+
+        // compare this attribute's UUID to make sure data ordering is identical between nodes and read cycles
+        // the data frame: [connid][temp][humid][water]
+        // TODO: make some something better for this
+        if(ble_uuid_equal(&attr->uuid, &node_data_attr_temp)) {
+                offset = sizeof(attr->value);
+        } else if(ble_uuid_equal(&attr->uuid, &node_data_attr_humid)) {
+                offset = sizeof(attr->value)*2;
+        } else if(ble_uuid_equal(&attr->uuid, &node_data_attr_water)) {
+                offset = sizeof(attr->value)*3;
+        } else {
+                printf("copy_attribute_value(): unknown attribute uuid: %s\r\n", ble_uuid_to_string(&attr->uuid));
+                return;
+        }
+
+        memcpy(target+offset, &attr->value, sizeof(attr->value));
+}
+
+void copy_node_sensor_data(const void *elem, void *ud)
+{
+        const struct node_list_elem *node = elem;
+        uint16_t *offset = ud;
+        uint8_t attribute_data[NODE_SENSOR_DATA_TRANSFER_SIZE] = { 0 };
+        uint8_t attribute_data_index = 0;
+
+        // copy the connection id for identification
+        // TODO: send the device MAC address as well
+        memcpy(attribute_data+attribute_data_index, &node->conn_idx, sizeof(node->conn_idx));
+        attribute_data_index++;
+        // index += 2 effectively; for each attribute as all attributes are 2 bytes
+        list_foreach_nonconst(node->attr_list, copy_attribute_value, &attribute_data[++attribute_data_index*2]);
+
+        memcpy(node_data+*offset, attribute_data, sizeof(attribute_data));
+
+        *offset += sizeof(attribute_data);
 }
 
 /*
@@ -101,11 +170,11 @@ void get_node_data_cb(uint8_t **value, uint16_t *length)
         }
         for (i = 0; i < conn_count; i++) {
                 // skip if connected device already in list
-                if(list_find_node(node_devices_connected, conn_idx[i]) != NULL) {
+                if(list_find_node_by_connid(node_devices_connected, conn_idx[i]) != NULL) {
                         continue;
                 }
                 // append the node to the linked list for later connection
-                struct node_list_data_elem *node = OS_MALLOC(sizeof(*node));
+                struct node_list_elem *node = OS_MALLOC(sizeof(*node));
 
                 // initial zero values
                 /* zero the struct */
@@ -123,15 +192,19 @@ void get_node_data_cb(uint8_t **value, uint16_t *length)
          * TODO: this should be done periodically
          */
         att_uuid_t data_svc_uuid;
-        ble_uuid_from_string("22222222-0000-0000-0000-222222222222", &data_svc_uuid);
+        ble_uuid_from_string(NODE_DATA_SVC_UUID, &data_svc_uuid);
 
         list_foreach(node_devices_connected, discover_node_service, &data_svc_uuid);
 
         /*
          * 3: return (old) node data
          */
+        uint16_t offset = 0;
+        node_data = OS_MALLOC(list_size(node_devices_connected) * NODE_SENSOR_DATA_TRANSFER_SIZE);
+        list_foreach_nonconst(node_devices_connected, copy_node_sensor_data, &offset);
 
-        // TODO: return node data
+        *value = node_data;
+        *length = offset;
 }
 
 
@@ -179,7 +252,7 @@ bool gap_connect(const bd_address_t *addr)
         // keep trying if busy connecting other node
         while(BLE_ERROR_BUSY == ble_gap_connect(addr, &params)) {
                 // Arbitrary delay to not flood the connect
-                OS_DELAY_MS(10);
+                OS_DELAY_MS(100);
         }
 
         return true;
@@ -249,6 +322,18 @@ void handle_ble_evt_gattc_discover_char(const ble_evt_gattc_discover_char_t *inf
         ble_error_t status;
 
         printf("characteristic discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
+
+        // add the attribute to the node's attribute list
+        struct node_list_elem *node = list_find_node_by_connid(node_devices_connected, info->conn_idx);
+        if(node == NULL) {
+                return;
+        }
+        struct sensor_attr_list_elem *elem = OS_MALLOC(sizeof(*elem));
+        memcpy(&elem->handle, &info->handle, sizeof(elem->handle));
+        memcpy(&elem->uuid, &info->uuid, sizeof(elem->uuid));
+        list_add(&node->attr_list, elem);
+
+        // read the attribute
         status = ble_gattc_read(info->conn_idx, info->value_handle, 0);
 }
 
@@ -262,8 +347,23 @@ void handle_ble_evt_gattc_read_completed(ble_evt_gattc_read_completed_t *info)
         printf("characteristic read for %d, length: %d, value: ", info->conn_idx, info->length);
         if(info->status == ATT_ERROR_OK)
         {
+                /*
+                 * copy the value to the list element
+                 * if node or attribute do not yet exist something has gone wrong; ignore it
+                 */
+                struct node_list_elem *node = list_find_node_by_connid(node_devices_connected, info->conn_idx);
+                if(node == NULL) {
+                        return;
+                }
+                // TODO: why is `handle` off by 1?
+                struct sensor_attr_list_elem *elem = list_find_attr_by_handle(node->attr_list, info->handle-1);
+                if(elem == NULL) {
+                        return;
+                }
+                memcpy(&elem->value, &info->value, sizeof(elem->value));
+
                 for (i = 0; i < info->length; ++i) {
-                        printf("%02x", info->value[i]);
+                        printf("%02x", elem->value[i]);
                 }
                 printf("\r\n");
         }
