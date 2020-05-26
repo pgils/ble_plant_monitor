@@ -119,14 +119,12 @@ void copy_node_sensor_data(const void *elem, void *ud)
         const struct node_list_elem *node = elem;
         uint16_t *offset = ud;
         uint8_t attribute_data[NODE_SENSOR_DATA_TRANSFER_SIZE] = { 0 };
-        uint8_t attribute_data_index = 0;
 
         // copy the connection id for identification
         // TODO: send the device MAC address as well
-        memcpy(attribute_data+attribute_data_index, &node->conn_idx, sizeof(node->conn_idx));
-        attribute_data_index++;
+        memcpy(attribute_data, &node->conn_idx, sizeof(node->conn_idx));
         // index += 2 effectively; for each attribute as all attributes are 2 bytes
-        list_foreach_nonconst(node->attr_list, copy_attribute_value, &attribute_data[++attribute_data_index*2]);
+        list_foreach_nonconst(node->attr_list, copy_attribute_value, &attribute_data);
 
         memcpy(node_data+*offset, attribute_data, sizeof(attribute_data));
 
