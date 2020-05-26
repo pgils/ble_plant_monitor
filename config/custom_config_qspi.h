@@ -29,8 +29,19 @@
  * #define CONFIG_RETARGET_UART  HW_UART1
  */
 
+/*
+ * unique byte to identify this devkit
+ * this is used to create a unique MAC address and as a base value for dummy data
+ */
+#define devkitUNIQUE_BYTE       0x1
+
+/*
+ * Whether to use dummy data for sensor data
+ */
+#define USE_DUMMY_DATA          ( 1 )
+
 /* Change the static BLE address of the device */
-#define defaultBLE_STATIC_ADDRESS   { 0x01, 0x01, 0x01, 0x06, 0x06, 0x06 }
+#define defaultBLE_STATIC_ADDRESS   { devkitUNIQUE_BYTE, 0x01, 0x01, 0x06, 0x06, 0x06 }
 
 
 /*************************************************************************************************\

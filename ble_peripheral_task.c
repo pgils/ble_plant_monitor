@@ -78,9 +78,17 @@ void get_sensor_value(uint8_t **value, uint16_t *length, uint32_t *data, uint8_t
 {
         uint16_t sensor_value;
 
+#ifdef USE_DUMMY_DATA
+        // random number 0-9
+        sensor_value = rand() % 10;
+#ifdef devkitUNIQUE_BYTE
+        sensor_value += devkitUNIQUE_BYTE;
+#endif // devkitUNIQUE_BYTE
+#else
         taskENTER_CRITICAL();
         sensor_value = *data;
         taskEXIT_CRITICAL();
+#endif // USE_DUMMY_DATA
 
         /* Update the Characteristic Attribute value as requested by the peer device */
         memcpy((void *)retained, (void *)&sensor_value, sizeof(sensor_value));
