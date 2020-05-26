@@ -42,10 +42,13 @@
 __RETAINED_RW bool _is_master_node = false;
 
 /*
- * Arrays used for holding the value of the Characteristic Attributes registered
- * in Dialog BLE database.
+ * Retained sensor data which can be pointed to in attribute read requests
  */
-__RETAINED_RW node_data data;
+__RETAINED_RW struct node_data {
+        uint8_t temperature[2];
+        uint8_t humidity[2];
+        uint8_t water[2];
+} ret_node_data;
 
 /* Task handle */
 __RETAINED_RW static OS_TASK ble_task_handle = NULL;
@@ -62,55 +65,43 @@ __RETAINED_RW static OS_TASK ble_task_handle = NULL;
  *
  * \param [in] length: The number of bytes/octets returned
  *
+ * \param [in] data: The location of the data to return
+ *
+ * \param [in] retained: retained data storage to use
  *
  * \warning: The callback function should have that specific prototype
  *
  * \warning: The BLE stack will not proceed with the next BLE event until the
  *        callback returns.
  */
-void get_temperature_value_cb(uint8_t **value, uint16_t *length)
+void get_sensor_value(uint8_t **value, uint16_t *length, uint32_t *data, uint8_t *retained)
 {
-        uint16_t return_value;;
+        uint16_t sensor_value;
 
         taskENTER_CRITICAL();
-        return_value = sensor_data.temperature;
+        sensor_value = *data;
         taskEXIT_CRITICAL();
 
         /* Update the Characteristic Attribute value as requested by the peer device */
-        memcpy((void *)data.temperature, (void *)&return_value, sizeof(return_value));
+        memcpy((void *)retained, (void *)&sensor_value, sizeof(sensor_value));
         /* Return the requested data back to the peer device */
-        *value  = data.temperature;       // A pointer that points to the returned data
-        *length = sizeof(data.temperature);  // The size of the returned data, expressed in bytes.
+        *value  = retained;       // A pointer that points to the returned data
+        *length = sizeof(sensor_value);  // The size of the returned data, expressed in bytes.
+}
+
+void get_temperature_value_cb(uint8_t **value, uint16_t *length)
+{
+        get_sensor_value(value, length, &sensor_data.temperature, ret_node_data.temperature);
 }
 
 void get_humidity_value_cb(uint8_t **value, uint16_t *length)
 {
-        uint16_t return_value;;
-
-        taskENTER_CRITICAL();
-        return_value = sensor_data.humidity;
-        taskEXIT_CRITICAL();
-
-        /* Update the Characteristic Attribute value as requested by the peer device */
-        memcpy((void *)data.humidity, (void *)&return_value, sizeof(return_value));
-        /* Return the requested data back to the peer device */
-        *value  = data.humidity;       // A pointer that points to the returned data
-        *length = sizeof(data.humidity);  // The size of the returned data, expressed in bytes.
+        get_sensor_value(value, length, &sensor_data.humidity, ret_node_data.humidity);
 }
 
 void get_water_value_cb(uint8_t **value, uint16_t *length)
 {
-        uint16_t return_value;;
-
-        taskENTER_CRITICAL();
-        return_value = sensor_data.water;
-        taskEXIT_CRITICAL();
-
-        /* Update the Characteristic Attribute value as requested by the peer device */
-        memcpy((void *)data.water, (void *)&return_value, sizeof(return_value));
-        /* Return the requested data back to the peer device */
-        *value  = data.water;       // A pointer that points to the returned data
-        *length = sizeof(data.water);  // The size of the returned data, expressed in bytes.
+        get_sensor_value(value, length, &sensor_data.water, ret_node_data.water);
 }
 
 void set_master_node_cb(const uint8_t *value, uint16_t length)
