@@ -329,10 +329,14 @@ void handle_ble_evt_gattc_discover_char(const ble_evt_gattc_discover_char_t *inf
         if(node == NULL) {
                 return;
         }
-        struct sensor_attr_list_elem *elem = OS_MALLOC(sizeof(*elem));
-        memcpy(&elem->handle, &info->handle, sizeof(elem->handle));
-        memcpy(&elem->uuid, &info->uuid, sizeof(elem->uuid));
-        list_add(&node->attr_list, elem);
+        // add the attribute to the attr list if needed (not needed on re-reads)
+        struct sensor_attr_list_elem *elem = list_find_attr_by_handle(node->attr_list, info->handle);
+        if(elem == NULL) {
+                struct sensor_attr_list_elem *elem = OS_MALLOC(sizeof(*elem));
+                memcpy(&elem->handle, &info->handle, sizeof(elem->handle));
+                memcpy(&elem->uuid, &info->uuid, sizeof(elem->uuid));
+                list_add(&node->attr_list, elem);
+        }
 
         // read the attribute
         status = ble_gattc_read(info->conn_idx, info->value_handle, 0);
