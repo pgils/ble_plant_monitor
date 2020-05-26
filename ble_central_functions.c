@@ -119,14 +119,12 @@ void copy_node_sensor_data(const void *elem, void *ud)
         const struct node_list_elem *node = elem;
         uint16_t *offset = ud;
         uint8_t attribute_data[NODE_SENSOR_DATA_TRANSFER_SIZE] = { 0 };
-        uint8_t attribute_data_index = 0;
 
         // copy the connection id for identification
         // TODO: send the device MAC address as well
-        memcpy(attribute_data+attribute_data_index, &node->conn_idx, sizeof(node->conn_idx));
-        attribute_data_index++;
+        memcpy(attribute_data, &node->conn_idx, sizeof(node->conn_idx));
         // index += 2 effectively; for each attribute as all attributes are 2 bytes
-        list_foreach_nonconst(node->attr_list, copy_attribute_value, &attribute_data[++attribute_data_index*2]);
+        list_foreach_nonconst(node->attr_list, copy_attribute_value, &attribute_data);
 
         memcpy(node_data+*offset, attribute_data, sizeof(attribute_data));
 
@@ -200,6 +198,9 @@ void get_node_data_cb(uint8_t **value, uint16_t *length)
          * 3: return (old) node data
          */
         uint16_t offset = 0;
+        if(node_data != NULL) {
+                OS_FREE(node_data);
+        }
         node_data = OS_MALLOC(list_size(node_devices_connected) * NODE_SENSOR_DATA_TRANSFER_SIZE);
         list_foreach_nonconst(node_devices_connected, copy_node_sensor_data, &offset);
 
@@ -328,10 +329,14 @@ void handle_ble_evt_gattc_discover_char(const ble_evt_gattc_discover_char_t *inf
         if(node == NULL) {
                 return;
         }
-        struct sensor_attr_list_elem *elem = OS_MALLOC(sizeof(*elem));
-        memcpy(&elem->handle, &info->handle, sizeof(elem->handle));
-        memcpy(&elem->uuid, &info->uuid, sizeof(elem->uuid));
-        list_add(&node->attr_list, elem);
+        // add the attribute to the attr list if needed (not needed on re-reads)
+        struct sensor_attr_list_elem *elem = list_find_attr_by_handle(node->attr_list, info->handle);
+        if(elem == NULL) {
+                struct sensor_attr_list_elem *elem = OS_MALLOC(sizeof(*elem));
+                memcpy(&elem->handle, &info->handle, sizeof(elem->handle));
+                memcpy(&elem->uuid, &info->uuid, sizeof(elem->uuid));
+                list_add(&node->attr_list, elem);
+        }
 
         // read the attribute
         status = ble_gattc_read(info->conn_idx, info->value_handle, 0);
