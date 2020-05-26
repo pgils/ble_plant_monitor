@@ -249,6 +249,12 @@ void ble_peripheral_task(void *params)
         ble_gap_adv_ad_struct_set(ARRAY_LENGTH(adv_data), adv_data, 1 , scan_rsp);
         ble_gap_adv_start(GAP_CONN_MODE_UNDIRECTED);
 
+        /* Initialize attributes for use in scanning (central) */
+        ble_uuid_from_string(NODE_DATA_SVC_UUID, &node_data_svc_uuid);
+        ble_uuid_from_string(NODE_DATA_ATTR_TEMP, &node_data_attr_temp);
+        ble_uuid_from_string(NODE_DATA_ATTR_HUMID, &node_data_attr_humid);
+        ble_uuid_from_string(NODE_DATA_ATTR_WATER, &node_data_attr_water);
+
         for (;;) {
                 OS_BASE_TYPE ret;
                 uint32_t notif;

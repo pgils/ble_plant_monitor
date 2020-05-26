@@ -94,9 +94,24 @@ void discover_node_service(const void *elem, const void *ud)
 void copy_attribute_value(const void *elem, void *ud)
 {
         const struct sensor_attr_list_elem *attr = elem;
-        uint8_t *value = ud;
+        uint8_t *target = ud;
+        uint16_t offset = 0;
 
-        memcpy(value, &attr->value, sizeof(attr->value));
+        // compare this attribute's UUID to make sure data ordering is identical between nodes and read cycles
+        // the data frame: [connid][temp][humid][water]
+        // TODO: make some something better for this
+        if(ble_uuid_equal(&attr->uuid, &node_data_attr_temp)) {
+                offset = sizeof(attr->value);
+        } else if(ble_uuid_equal(&attr->uuid, &node_data_attr_humid)) {
+                offset = sizeof(attr->value)*2;
+        } else if(ble_uuid_equal(&attr->uuid, &node_data_attr_water)) {
+                offset = sizeof(attr->value)*3;
+        } else {
+                printf("copy_attribute_value(): unknown attribute uuid: %s\r\n", ble_uuid_to_string(&attr->uuid));
+                return;
+        }
+
+        memcpy(target+offset, &attr->value, sizeof(attr->value));
 }
 
 void copy_node_sensor_data(const void *elem, void *ud)

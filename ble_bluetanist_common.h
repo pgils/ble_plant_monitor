@@ -40,6 +40,11 @@
 #define NODE_DATA_ATTR_HUMID    "22222222-0000-0000-0000-000000000002"
 #define NODE_DATA_ATTR_WATER    "22222222-0000-0000-0000-000000000003"
 
+att_uuid_t node_data_svc_uuid;
+att_uuid_t node_data_attr_temp;
+att_uuid_t node_data_attr_humid;
+att_uuid_t node_data_attr_water;
+
 /*
  * Macro used for setting the maximum length, expressed in bytes,
  * of Characteristic Attributes.
