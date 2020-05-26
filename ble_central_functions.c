@@ -198,6 +198,9 @@ void get_node_data_cb(uint8_t **value, uint16_t *length)
          * 3: return (old) node data
          */
         uint16_t offset = 0;
+        if(node_data != NULL) {
+                OS_FREE(node_data);
+        }
         node_data = OS_MALLOC(list_size(node_devices_connected) * NODE_SENSOR_DATA_TRANSFER_SIZE);
         list_foreach_nonconst(node_devices_connected, copy_node_sensor_data, &offset);
 
