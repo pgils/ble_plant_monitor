@@ -87,7 +87,7 @@ void discover_node_service(const void *elem, const void *ud)
         const struct node_list_elem *node = elem;
         const att_uuid_t *svc_uuid = ud;
 
-        printf("discover for: %d\r\n", node->conn_idx);
+        printf("Starting service discovery for connection: %d\r\n", node->conn_idx);
         status = ble_gattc_discover_svc(node->conn_idx, svc_uuid);
 }
 
@@ -155,8 +155,6 @@ void get_node_data_cb(uint8_t **value, uint16_t *length)
         uint16_t *conn_idx;
         int i;
 
-        printf("get_node_data_cb\r\n");
-
         /*
          * 1: push all connected nodes in the connected node list
          */
@@ -164,7 +162,7 @@ void get_node_data_cb(uint8_t **value, uint16_t *length)
         status = ble_gap_get_connected(&conn_count, &conn_idx);
         taskEXIT_CRITICAL();
         if(status == BLE_STATUS_OK) {
-                printf("connected nodes: %d\r\n", conn_count);
+                printf("Requesting data from %d nodes\r\n", conn_count);
         }
         for (i = 0; i < conn_count; i++) {
                 // skip if connected device already in list
@@ -248,7 +246,7 @@ bool gap_connect(const bd_address_t *addr)
 {
         gap_conn_params_t params = CFG_CONN_PARAMS;
 
-        printf("connecting to: %s\r\n", ble_address_to_string(addr));
+        printf("Initiating connection to: %s\r\n", ble_address_to_string(addr));
 
         // keep trying if busy connecting other node
         while(BLE_ERROR_BUSY == ble_gap_connect(addr, &params)) {
@@ -311,7 +309,7 @@ void handle_ble_evt_gattc_discover_svc(const ble_evt_gattc_discover_svc_t *info)
         ble_error_t status;
 
         // sensor data service discovered, scan for attributes
-        printf("service discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
+        printf("Service discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
         status = ble_gattc_discover_char(info->conn_idx, info->start_h, info->end_h, NULL);
 }
 
@@ -322,7 +320,7 @@ void handle_ble_evt_gattc_discover_char(const ble_evt_gattc_discover_char_t *inf
 {
         ble_error_t status;
 
-        printf("characteristic discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
+        printf("Characteristic discovered for %d: %s\r\n", info->conn_idx, ble_uuid_to_string(&info->uuid));
 
         // add the attribute to the node's attribute list
         struct node_list_elem *node = list_find_node_by_connid(node_devices_connected, info->conn_idx);
@@ -349,7 +347,7 @@ void handle_ble_evt_gattc_read_completed(ble_evt_gattc_read_completed_t *info)
 {
         int i;
 
-        printf("characteristic read for %d, length: %d, value: ", info->conn_idx, info->length);
+        printf("Characteristic read for %d, length: %d, value: ", info->conn_idx, info->length);
         if(info->status == ATT_ERROR_OK)
         {
                 /*

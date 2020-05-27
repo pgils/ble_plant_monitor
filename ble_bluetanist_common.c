@@ -61,8 +61,7 @@ void event_sent_cb(uint16_t conn_idx, bool status, gatt_event_t type)
 
 void handle_evt_gap_connected(ble_evt_gap_connected_t *evt)
 {
-        printf("gap connected: %s\r\n", ble_address_to_string(&evt->peer_address));
-        printf("my address: %s\r\n", ble_address_to_string(&evt->own_addr));
+        printf("GAP connected callback - Connection idx: %d, Remote address: %s", evt->conn_idx, ble_address_to_string(&evt->peer_address));
 }
 
 void handle_evt_gap_disconnected(ble_evt_gap_disconnected_t *evt)
@@ -83,6 +82,5 @@ void handle_evt_gap_adv_completed(ble_evt_gap_adv_completed_t *evt)
  */
 void handle_ble_evt_gap_connection_completed(const ble_evt_gap_connection_completed_t *info)
 {
-        printf("BLE_EVT_GAP_CONNECTION_COMPLETED\r\n");
-        printf("Status: 0x%02x\r\n", info->status);
+        printf("GAP connection completed - Status: 0x%02x\r\n", info->status);
 }
